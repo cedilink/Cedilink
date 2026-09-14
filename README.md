@@ -64,7 +64,7 @@ Agents can use CediLink to:
 *  Build their reputation
 *  Serve users within their local community
 
----
+
 
 ## ⚡ Why Stellar?
 
@@ -78,7 +78,7 @@ This enables us to explore:
 * Programmable escrow
 * Transparent transaction records
 
----
+
 
 ##  Trust & Reputation
 
@@ -93,8 +93,6 @@ The platform is designed to provide users with information about agents before i
 ** Transaction activity**
 
 The escrow workflow adds an additional layer of protection during the exchange.
-
----
 
 ## 🛠️ What We're Building
 
@@ -116,7 +114,6 @@ Smart-contract workflow for securely holding and releasing digital funds.
 
 End-to-end flow from agent selection to cash handover confirmation.
 
----
 
 ##  Project Status
 
