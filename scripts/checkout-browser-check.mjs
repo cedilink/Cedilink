@@ -9,7 +9,7 @@ import { chromium } from "playwright-core";
 
 const backend = new URL("../../cedlink-backend/", import.meta.url);
 const require = createRequire(new URL("package.json", backend));
-const { Asset, BASE_FEE, Horizon, Keypair, Networks, Operation, TransactionBuilder } = require("@stellar/stellar-sdk");
+const { Asset, BASE_FEE, Horizon, Keypair, Memo, Networks, Operation, TransactionBuilder } = require("@stellar/stellar-sdk");
 for (const file of [".env.testnet", ".env.local"]) {
   try {
     process.loadEnvFile(new URL(file, backend));
@@ -289,6 +289,42 @@ console.log("\nA transaction that fails on Stellar, then a retry");
   await page.getByRole("button", { name: /^Pay \$6 USDC$/ }).click();
   check("the retry succeeds", await sees(page, "Payment successful", 60_000));
   check("the backend marks the retried payment paid", (await merchant("GET", `/payments/${id}`)).status === "PAID");
+  check("no browser errors", errors.length === 0, errors.join(" | "));
+  await close();
+}
+
+console.log("\nPaying from a wallet app (the route for phones)");
+{
+  const id = await createPayment("9.00", "Wallet app case");
+  const { page, errors, close } = await open(id, { mobile: true });
+  await page.getByRole("button", { name: "Continue" }).click();
+  await page.getByRole("button", { name: "Connect Stellar Wallet" }).click();
+  await page.getByRole("dialog").getByRole("button", { name: /Open in wallet app/ }).click();
+  check("shows what to send and waits", (await sees(page, "Pay from your wallet app")) && (await sees(page, "Waiting for your payment")));
+  await settle(page); await shot(page, "m-17-wallet-app");
+  check("no horizontal scroll", !(await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth)));
+
+  // Act as the wallet app: read the payment link the page offers and send exactly that.
+  const link = await page.getByRole("link", { name: "Open wallet app" }).getAttribute("href");
+  const request = Object.fromEntries(new URLSearchParams(link.slice(link.indexOf("?") + 1)));
+  check("the link is a SEP-7 payment request for this checkout", link.startsWith("web+stellar:pay?") && request.memo === id && request.amount === "9.00" && request.memo_type === "MEMO_TEXT", link);
+  const fromWallet = async (amount) => {
+    const tx = new TransactionBuilder(await horizon.loadAccount(customer.publicKey()), { fee: BASE_FEE, networkPassphrase: request.network_passphrase })
+      .addOperation(Operation.payment({ destination: request.destination, asset: new Asset(request.asset_code, request.asset_issuer), amount }))
+      .addMemo(Memo.text(request.memo))
+      .setTimeout(60)
+      .build();
+    tx.sign(customer);
+    return horizon.submitTransaction(tx);
+  };
+  await fromWallet("8.50");
+  await page.waitForTimeout(12_000);
+  check("an underpayment does not complete the checkout", (await sees(page, "Waiting for your payment", 2_000)) && (await merchant("GET", `/payments/${id}`)).status === "AWAITING_PAYMENT");
+  await fromWallet(request.amount);
+  check("the exact payment turns the page to success", await sees(page, "Payment successful", 60_000));
+  await page.waitForTimeout(1600); await shot(page, "m-17-wallet-app-success");
+  const paid = await merchant("GET", `/payments/${id}`);
+  check("the backend verified it and recorded the paying wallet", paid.status === "PAID" && paid.customerWallet === customer.publicKey());
   check("no browser errors", errors.length === 0, errors.join(" | "));
   await close();
 }

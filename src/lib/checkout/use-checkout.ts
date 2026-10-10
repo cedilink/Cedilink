@@ -170,6 +170,7 @@ export function useCheckout(checkout: Checkout) {
     back: () => dispatch({ type: "BACK" }),
     openWallets: () => dispatch({ type: "OPEN_WALLETS" }),
     closeWallets: () => dispatch({ type: "CLOSE_WALLETS" }),
+    payFromWalletApp: () => dispatch({ type: "OPEN_WALLET_APP" }),
     disconnect: () => dispatch({ type: "DISCONNECT" }),
   };
 }

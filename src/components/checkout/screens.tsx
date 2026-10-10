@@ -8,6 +8,7 @@ import stellarLogo from "@/assets/illustrations/stellar-logo.png";
 import walletCards from "@/assets/illustrations/wallet-cards.png";
 import type { Checkout } from "@/lib/api/client";
 import type { CheckoutController } from "@/lib/checkout/use-checkout";
+import { walletAppLink } from "@/lib/checkout/sep7";
 import { formatDateTime, truncateAddress, truncateHash } from "@/lib/format";
 import { Badge, Spinner } from "../motion/badge";
 import { Button, buttonClass } from "../ui/button";
@@ -464,6 +465,49 @@ export function WalletNotInstalled({ controller }: Props) {
         </>
       }
     />
+  );
+}
+
+/**
+ * Paying from a wallet app instead of a browser extension, which is the route for phones.
+ * The customer sends the payment themselves; Credlink recognises it by the memo and this
+ * page moves to success when it has been verified.
+ */
+export function WalletApp({ checkout, controller }: Props) {
+  const copyRow = (label: string, shown: string, value: string) => (
+    <Row label={label}>
+      <span className="min-w-0 truncate">{shown}</span>
+      <CopyButton value={value} label={label.toLowerCase()} />
+    </Row>
+  );
+  return (
+    <StatusScreen
+      icon={<SpinnerIcon />}
+      title="Pay from your wallet app"
+      message="Send this exact payment from any Stellar wallet. This page updates when it arrives."
+      actions={
+        <>
+          <a href={walletAppLink(checkout)} className={buttonClass({ variant: "ink" })}>
+            Open wallet app
+          </a>
+          <Button variant="outline" onClick={controller.openWallets}>
+            Choose another wallet
+          </Button>
+        </>
+      }
+    >
+      <Panel>
+        {copyRow("Amount", `${checkout.amount} ${checkout.asset}`, checkout.amount)}
+        {copyRow("Send to", truncateAddress(checkout.recipientAddress, 6, 6), checkout.recipientAddress)}
+        {copyRow("Memo (text)", checkout.paymentId, checkout.paymentId)}
+        {copyRow(`${checkout.asset} issuer`, truncateAddress(checkout.assetIssuer, 6, 6), checkout.assetIssuer)}
+        <Row label="Network">{checkout.network.label}</Row>
+      </Panel>
+      <Note>Include the memo exactly as shown. Without it we can&apos;t match your payment to this order.</Note>
+      <p className="flex items-center justify-center gap-2 text-sm text-muted" role="status">
+        <Spinner className="size-3.5" /> Waiting for your payment…
+      </p>
+    </StatusScreen>
   );
 }
 

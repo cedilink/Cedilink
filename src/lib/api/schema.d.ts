@@ -473,6 +473,7 @@ export interface components {
             productName: string;
             amount: string;
             asset: string;
+            assetIssuer: string;
             network: {
                 id: string;
                 label: string;

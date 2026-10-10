@@ -80,4 +80,4 @@ Stellar Testnet is wiped from time to time. When that happens, in the backend fo
 Every step above passes in automated browser tests with a stand-in wallet. Two things have only ever been checked by hand, so try them before recording:
 
 - A payment through the real Freighter extension (steps 6 and 7).
-- The checkout on an actual phone. Freighter is a desktop extension; a phone browser currently has no wallet to connect.
+- The checkout on an actual phone. Freighter is a desktop extension, so on a phone the route is **Connect Stellar Wallet → Open in wallet app**: the page shows the amount, address and memo to send, and turns to success when the payment arrives. That flow is tested with a script standing in for the wallet app, not with a real one. The wallet app must be on Testnet and hold this environment's test USDC.

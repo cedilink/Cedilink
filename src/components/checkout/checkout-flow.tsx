@@ -29,6 +29,7 @@ const SCREENS: Record<Screen, ComponentType<{ checkout: Checkout; controller: Ch
   walletDisconnected: screens.WalletDisconnected,
   connectionRejected: screens.ConnectionRejected,
   walletNotInstalled: screens.WalletNotInstalled,
+  walletApp: screens.WalletApp,
 };
 
 // Order of the main path, used to slide forwards or backwards between screens.
@@ -48,7 +49,7 @@ export function CheckoutFlow({ checkout }: { checkout: Checkout }) {
   const ScreenView = SCREENS[state.screen];
 
   const amountLabel = AMOUNT_LABEL[state.screen];
-  const canGoBack = state.screen === "summary" || state.screen === "review";
+  const canGoBack = state.screen === "summary" || state.screen === "review" || state.screen === "walletApp";
   const title = state.screen === "selectMethod" ? "Choose payment method" : state.screen === "review" ? "Review Payment" : "Smartpay";
   const identity = state.screen === "selectMethod" ? checkout.productName : checkout.merchant.name;
   // Method selection sits on the page background with its own white rows, as designed.
@@ -141,6 +142,8 @@ export function CheckoutFlow({ checkout }: { checkout: Checkout }) {
           open={state.walletPickerOpen}
           connecting={state.connecting ? state.lastWalletId : null}
           onSelect={controller.connect}
+          // Older backends do not send the issuer; without it a direct payment cannot be described.
+          onWalletApp={checkout.assetIssuer ? controller.payFromWalletApp : undefined}
           onClose={controller.closeWallets}
         />
       </div>

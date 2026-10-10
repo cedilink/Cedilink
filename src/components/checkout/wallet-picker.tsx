@@ -50,11 +50,14 @@ export function WalletPicker({
   open,
   connecting,
   onSelect,
+  onWalletApp,
   onClose,
 }: {
   open: boolean;
   connecting: WalletId | null;
   onSelect: (wallet: WalletId) => void;
+  /** Absent when the backend cannot supply what a direct payment needs. */
+  onWalletApp?: () => void;
   onClose: () => void;
 }) {
   const still = useReducedMotion();
@@ -148,7 +151,8 @@ export function WalletPicker({
                 icon={<Smartphone className="size-4" strokeWidth={1.6} />}
                 name="Open in wallet app"
                 kind="On your phone"
-                comingSoon
+                comingSoon={!onWalletApp}
+                onSelect={onWalletApp}
               />
             </div>
             <div className="mt-2.5 [&>p]:bg-white sm:[&>p]:bg-surface">

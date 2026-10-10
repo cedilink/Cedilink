@@ -18,7 +18,8 @@ export type Screen =
   | "alreadyPaid" // 14
   | "walletDisconnected" // 15
   | "connectionRejected" // 16
-  | "walletNotInstalled"; // 16
+  | "walletNotInstalled" // 16
+  | "walletApp"; // paying from a wallet app, e.g. on a phone; not in the numbered designs
 
 export interface CheckoutState {
   screen: Screen;
@@ -32,6 +33,8 @@ export interface CheckoutState {
   paidAt: string | null;
   /** True once this browser session has a transaction in flight or the page loaded with one. */
   submitted: boolean;
+  /** The customer chose to pay from a wallet app, outside this page. */
+  external: boolean;
   /** A connect or preflight request is running. */
   connecting: boolean;
 }
@@ -41,6 +44,7 @@ export type CheckoutEvent =
   | { type: "BACK" }
   | { type: "OPEN_WALLETS" }
   | { type: "CLOSE_WALLETS" }
+  | { type: "OPEN_WALLET_APP" }
   | { type: "CONNECTING"; walletId: WalletId }
   | { type: "WALLET_MISSING" }
   | { type: "WALLET_REJECTED" }
@@ -89,6 +93,7 @@ export function initialState(checkout: Pick<Checkout, "status" | "transactionHas
     transactionHash: checkout.transactionHash,
     paidAt: checkout.paidAt,
     submitted: IN_FLIGHT.includes(checkout.status),
+    external: false,
     connecting: false,
   };
   // Opening or reloading the link lands on the screen that matches the payment's real state.
@@ -107,10 +112,13 @@ export function reduce(state: CheckoutState, event: CheckoutEvent): CheckoutStat
     case "BACK":
       if (state.screen === "summary") return { ...state, screen: "selectMethod", walletPickerOpen: false };
       if (state.screen === "review") return { ...state, screen: "summary", wallet: null, preflight: null };
+      if (state.screen === "walletApp") return { ...state, screen: "summary", external: false };
       return state;
 
     case "OPEN_WALLETS":
-      return { ...state, screen: "summary", walletPickerOpen: true };
+      return { ...state, screen: "summary", walletPickerOpen: true, external: false };
+    case "OPEN_WALLET_APP":
+      return { ...state, screen: "walletApp", walletPickerOpen: false, external: true };
     case "CLOSE_WALLETS":
       return { ...state, walletPickerOpen: false };
 
@@ -157,7 +165,9 @@ export function reduce(state: CheckoutState, event: CheckoutEvent): CheckoutStat
         paidAt: event.paidAt ?? state.paidAt,
       };
       // The backend's verdict is the only route to the success screen.
-      if (event.status === "PAID") return { ...next, screen: state.submitted ? "success" : "alreadyPaid", walletPickerOpen: false };
+      // A payment this customer made (here, or from their wallet app) is a success; one that
+      // simply turned out to be paid already is reported as such.
+      if (event.status === "PAID") return { ...next, screen: state.submitted || state.external ? "success" : "alreadyPaid", walletPickerOpen: false };
       if (event.status === "EXPIRED") return { ...next, screen: "expired", walletPickerOpen: false };
       if (event.status === "FAILED") return state.submitted ? { ...next, screen: "failed", submitted: false } : next;
       if (IN_FLIGHT.includes(event.status) && !state.submitted) return { ...next, screen: "pending", submitted: true };

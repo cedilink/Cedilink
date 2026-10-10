@@ -42,6 +42,10 @@ are forwarded, which keeps the merchant session cookie first-party.
 - `src/lib/wallets/` holds one adapter per wallet behind a shared interface. Freighter is on;
   Albedo is implemented and switched on with `NEXT_PUBLIC_ALBEDO_ENABLED=true`.
 - `src/components/checkout/` holds the screens.
+- Phones have no browser extension, so the wallet picker also offers "Open in wallet app": the page
+  shows the payment to send (and a SEP-7 link, `src/lib/checkout/sep7.ts`) and waits for the backend
+  to see and verify it. It needs a backend that returns `assetIssuer` on the checkout; with an older
+  backend the option shows as "Coming soon".
 
 ### Dashboard
 

@@ -82,6 +82,20 @@ describe("checkout machine", () => {
     expect(screenForProblem("SOMETHING_ELSE")).toBe("failed");
   });
 
+  it("treats a payment from a wallet app as this customer's success", () => {
+    let s = run(fresh(), { type: "CONTINUE" }, { type: "OPEN_WALLETS" }, { type: "OPEN_WALLET_APP" });
+    expect(s.screen).toBe("walletApp");
+    expect(s.walletPickerOpen).toBe(false);
+    s = run(s, { type: "STATUS", status: "PAID", transactionHash: "ab", paidAt: "now" });
+    expect(s.screen).toBe("success");
+  });
+
+  it("leaves wallet-app mode when the customer goes back", () => {
+    const s = run(fresh(), { type: "CONTINUE" }, { type: "OPEN_WALLET_APP" }, { type: "BACK" });
+    expect(s.screen).toBe("summary");
+    expect(run(s, { type: "STATUS", status: "PAID", transactionHash: "ab" }).screen).toBe("alreadyPaid");
+  });
+
   it("handles wallet connection failures", () => {
     const open = run(fresh(), { type: "CONTINUE" }, { type: "OPEN_WALLETS" }, { type: "CONNECTING", walletId: "freighter" });
     expect(run(open, { type: "WALLET_MISSING" }).screen).toBe("walletNotInstalled");
