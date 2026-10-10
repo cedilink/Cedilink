@@ -1,6 +1,6 @@
 # Credlink Smartpay — Frontend
 
-Next.js app for Credlink Smartpay: the customer checkout, and (to come) the landing page and merchant dashboard.
+Next.js app for Credlink Smartpay: the customer checkout and the merchant dashboard, with the landing page to come.
 
 Plan and rationale: [docs/plans/implementation-plan.md](docs/plans/implementation-plan.md). Designs: `ui-assets/`.
 
@@ -22,7 +22,7 @@ are forwarded, which keeps the merchant session cookie first-party.
 |---|---|
 | `/c/[paymentId]` | Customer checkout: all 16 designed screens, Freighter wallet, live status |
 | `/` | Placeholder; landing page to come |
-| `/dashboard` | To come |
+| `/login`, `/dashboard/*` | Merchant dashboard: overview, payments list and details, create payment, Stellar USDC settings, live updates |
 
 ### Checkout
 
@@ -32,6 +32,13 @@ are forwarded, which keeps the merchant session cookie first-party.
 - `src/lib/wallets/` holds one adapter per wallet behind a shared interface. Freighter is on;
   Albedo is implemented and switched on with `NEXT_PUBLIC_ALBEDO_ENABLED=true`.
 - `src/components/checkout/` holds the screens.
+
+### Dashboard
+
+- Pages under `src/app/dashboard/` fetch through `src/lib/dashboard/queries.ts` (TanStack Query).
+- `src/components/dashboard/toasts.tsx` listens to the merchant event stream: every update refreshes
+  what is on screen, and a payment turning paid raises the "Payment successful" toast.
+- Sign in with the demo merchant seeded by the backend (`npm run db:seed` there).
 
 To pay from a browser, install Freighter, switch it to Testnet, and import the customer secret key
 from the backend's `.env.testnet`.
@@ -43,8 +50,9 @@ from the backend's `.env.testnet`.
 | `npm run typecheck`, `npm run lint` | Types and lint |
 | `npx vitest run` | Checkout state machine |
 | `node scripts/checkout-browser-check.mjs` | The checkout in Chrome, end to end against a running backend on Testnet |
+| `node scripts/dashboard-browser-check.mjs` | The dashboard in Chrome, including a live payment arriving; expects a freshly seeded database |
 
-The browser check replaces the Freighter extension (which cannot be automated) with a stand-in that
+The checkout check replaces the Freighter extension (which cannot be automated) with a stand-in that
 signs with the Testnet customer key. It needs the frontend started with `NEXT_PUBLIC_TEST_WALLET=true`,
 and `FRONTEND_URL` / `API_URL` pointing at the running servers. Never set that flag in production.
 
