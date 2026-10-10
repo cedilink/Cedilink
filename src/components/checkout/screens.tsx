@@ -377,9 +377,19 @@ export function WrongNetwork({ checkout, controller }: Props) {
     message = `This account doesn't exist on ${network.label} yet.`;
     help = <Note>Fund the account with XLM on {network.label}, add {asset} to it, then try again.</Note>;
   } else if (code === "NO_USDC_TRUSTLINE") {
-    message = `Your wallet is on ${network.label}, but it hasn't added the ${asset} this merchant accepts.`;
+    // A wallet often "has USDC" that is a different token with the same name.
+    const lookalike = controller.state.preflight?.lookalike;
+    message = lookalike
+      ? `Your wallet holds ${lookalike.balance} ${asset}, but from a different issuer. This merchant accepts the ${asset} below.`
+      : `Your wallet is on ${network.label}, but it hasn't added the ${asset} this merchant accepts.`;
     help = (
       <>
+        {lookalike ? (
+          <Note icon={false}>
+            Yours is issued by {truncateAddress(lookalike.issuer, 6, 6)}. On Stellar, tokens with the same name from different issuers are different
+            assets.
+          </Note>
+        ) : null}
         {assetIssuer ? (
           <Panel>
             <Row label="Asset code">{asset}</Row>
@@ -390,8 +400,8 @@ export function WrongNetwork({ checkout, controller }: Props) {
           </Panel>
         ) : null}
         <Note>
-          In your wallet, add an asset with this code and issuer, make sure it holds enough {asset}, then try again. A token named {asset} from a
-          different issuer will not work.
+          In your wallet, add an asset with this code and issuer, make sure it holds enough {asset}, then try again.
+          {network.id === "testnet" ? ` On Testnet you can get it by swapping some XLM for this ${asset} in your wallet.` : ""}
         </Note>
       </>
     );

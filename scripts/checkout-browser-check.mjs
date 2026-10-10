@@ -110,6 +110,25 @@ async function connectFreighter(page) {
   await page.getByRole("dialog").getByRole("button", { name: /Freighter/ }).click();
 }
 
+// The checks spend the customer's test USDC. When it runs low, buy more with its test XLM
+// on Testnet's exchange, so a run never fails for lack of funds.
+{
+  const testnet = new Horizon.Server("https://horizon-testnet.stellar.org");
+  const asset = new Asset("USDC", (await merchant("GET", "/payment-methods/stellar-usdc")).asset.issuer);
+  const account = await testnet.loadAccount(customer.publicKey());
+  const held = Number(account.balances.find((b) => b.asset_code === "USDC" && b.asset_issuer === asset.getIssuer())?.balance ?? 0);
+  if (held < 150) {
+    const amount = (300 - held).toFixed(2);
+    console.log(`Customer holds ${held} test USDC; buying ${amount} more.`);
+    const tx = new TransactionBuilder(account, { fee: BASE_FEE, networkPassphrase: Networks.TESTNET })
+      .addOperation(Operation.pathPaymentStrictReceive({ sendAsset: Asset.native(), sendMax: String(Math.ceil(Number(amount) * 25)), destination: customer.publicKey(), destAsset: asset, destAmount: amount }))
+      .setTimeout(60)
+      .build();
+    tx.sign(customer);
+    await testnet.submitTransaction(tx);
+  }
+}
+
 if (!EXPIRY_ONLY) {
 console.log("\nHappy path (desktop)");
 {
@@ -270,10 +289,21 @@ console.log("\nA Testnet wallet that has not added this USDC");
   const stranger = Keypair.random();
   check("test account funded", (await fetch(`https://friendbot.stellar.org?addr=${stranger.publicKey()}`)).ok);
   const id = await createPayment("2.00", "Trustline case");
-  const { page, close } = await open(id, { signer: stranger });
+  let { page, close } = await open(id, { signer: stranger });
   await connectFreighter(page);
   check("12 says the wallet is on the right network but lacks the asset", (await sees(page, "hasn't added the USDC this merchant accepts")) && (await sees(page, "Issuer")));
   check("12 does not blame the network", !(await sees(page, "Switch your wallet", 1_000)));
+  await close();
+
+  // The same wallet after acquiring a token called USDC from some other issuer.
+  const impostor = Keypair.random();
+  await fetch(`https://friendbot.stellar.org?addr=${impostor.publicKey()}`);
+  const fake = new Asset("USDC", impostor.publicKey());
+  await send(stranger, Operation.changeTrust({ asset: fake }));
+  await send(impostor, Operation.payment({ destination: stranger.publicKey(), asset: fake, amount: "9300" }));
+  ({ page, close } = await open(id, { signer: stranger }));
+  await connectFreighter(page);
+  check("12 names the look-alike token the wallet holds", (await sees(page, "holds 9300.00 USDC, but from a different issuer")) && (await sees(page, "Yours is issued by")));
   await settle(page); await shot(page, "12-missing-trustline");
   await close();
 }

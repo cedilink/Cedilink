@@ -556,6 +556,10 @@ export interface components {
             estimatedFee: string;
             feeAsset: string;
             recipientAddress: string;
+            lookalike: {
+                issuer: string;
+                balance: string;
+            } | null;
         };
         BuiltTransaction: {
             xdr: string;
