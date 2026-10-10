@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Field, inputClass } from "@/components/dashboard/ui";
@@ -48,6 +49,12 @@ export default function LoginPage() {
         <Button type="submit" variant="brand" disabled={busy}>
           {busy ? "Signing in…" : "Sign in"}
         </Button>
+        <p className="text-center text-sm text-muted">
+          New to Credlink Smartpay?{" "}
+          <Link href="/signup" className="text-brand underline-offset-4 hover:underline">
+            Create an account
+          </Link>
+        </p>
       </form>
     </main>
   );

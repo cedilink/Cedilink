@@ -22,6 +22,7 @@ are forwarded, which keeps the merchant session cookie first-party.
 |---|---|
 | `/c/[paymentId]` | Customer checkout: all 16 designed screens, Freighter wallet, live status |
 | `/` | Landing page with scroll-driven animation |
+| `/signup` | Merchant sign-up, with a wallet created for the merchant or one they already have (Freighter, Albedo or a pasted public key) |
 | `/login`, `/dashboard/*` | Merchant dashboard: overview, payments list and details, create payment, Stellar USDC settings, live updates |
 
 ### Landing page
@@ -52,7 +53,8 @@ are forwarded, which keeps the merchant session cookie first-party.
 - Pages under `src/app/dashboard/` fetch through `src/lib/dashboard/queries.ts` (TanStack Query).
 - `src/components/dashboard/toasts.tsx` listens to the merchant event stream: every update refreshes
   what is on screen, and a payment turning paid raises the "Payment successful" toast.
-- Sign in with the demo merchant seeded by the backend (`npm run db:seed` there).
+- Create an account at `/signup`, or sign in with the demo merchant seeded by the backend
+  (`npm run db:seed` there).
 
 To pay from a browser, install Freighter, switch it to Testnet, and import the customer secret key
 from the backend's `.env.testnet`.
@@ -65,6 +67,7 @@ from the backend's `.env.testnet`.
 | `npm test` | Checkout state machine |
 | `node scripts/landing-browser-check.mjs` | The landing page in Chrome: scrolls through on desktop, mobile and with reduced motion |
 | `node scripts/checkout-browser-check.mjs` | The checkout in Chrome, end to end against a running backend on Testnet |
+| `node scripts/signup-browser-check.mjs` | Both sign-up routes in Chrome, then a customer paying the new merchant |
 | `node scripts/dashboard-browser-check.mjs` | The dashboard in Chrome, including a live payment arriving; expects a freshly seeded database |
 
 The checkout check replaces the Freighter extension (which cannot be automated) with a stand-in that

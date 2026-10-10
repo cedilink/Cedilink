@@ -234,7 +234,8 @@ console.log("\nWallet prompt: cancel, decline, disconnect");
 }
 
 const horizon = new Horizon.Server("https://horizon-testnet.stellar.org");
-const usdc = new Asset("USDC", process.env.USDC_ISSUER);
+// The asset the server accepts, as the server reports it.
+const usdc = new Asset("USDC", (await merchant("GET", "/payment-methods/stellar-usdc")).asset.issuer);
 async function send(source, ...operations) {
   const builder = new TransactionBuilder(await horizon.loadAccount(source.publicKey()), { fee: BASE_FEE, networkPassphrase: Networks.TESTNET }).setTimeout(60);
   for (const operation of operations) builder.addOperation(operation);

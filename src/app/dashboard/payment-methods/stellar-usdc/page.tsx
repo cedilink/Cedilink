@@ -50,7 +50,11 @@ function SettingsForm({ settings }: { settings: StellarSettings }) {
         <Field
           label="Receiving wallet"
           error={error}
-          hint="The Stellar public key that receives your payments. It must already hold a USDC trustline."
+          hint={
+            settings.managed && address.trim() === settings.receivingAddress
+              ? "Created and funded for you on Stellar Testnet. You can replace it with a wallet of your own."
+              : "The Stellar public key that receives your payments. It must already hold a USDC trustline."
+          }
         >
           <input
             className={`${inputClass} font-mono text-[13px]`}
