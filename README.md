@@ -58,7 +58,7 @@ from the backend's `.env.testnet`.
 | Command | What it covers |
 |---|---|
 | `npm run typecheck`, `npm run lint` | Types and lint |
-| `npx vitest run` | Checkout state machine |
+| `npm test` | Checkout state machine |
 | `node scripts/landing-browser-check.mjs` | The landing page in Chrome: scrolls through on desktop, mobile and with reduced motion |
 | `node scripts/checkout-browser-check.mjs` | The checkout in Chrome, end to end against a running backend on Testnet |
 | `node scripts/dashboard-browser-check.mjs` | The dashboard in Chrome, including a live payment arriving; expects a freshly seeded database |
