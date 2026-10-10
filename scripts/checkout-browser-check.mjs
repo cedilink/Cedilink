@@ -9,7 +9,7 @@ import { chromium } from "playwright-core";
 
 const backend = new URL("../../cedlink-backend/", import.meta.url);
 const require = createRequire(new URL("package.json", backend));
-const { Keypair, TransactionBuilder } = require("@stellar/stellar-sdk");
+const { Asset, BASE_FEE, Horizon, Keypair, Networks, Operation, TransactionBuilder } = require("@stellar/stellar-sdk");
 for (const file of [".env.testnet", ".env.local"]) {
   try {
     process.loadEnvFile(new URL(file, backend));
@@ -50,7 +50,16 @@ const createPayment = async (amount, productName = "Ghana Web3 Conference Ticket
 const browser = await chromium.launch({ channel: "chrome" });
 
 /** Opens a checkout with a stand-in wallet behaving as `mode` says. */
-async function open(paymentId, { mode = "ok", mobile = false, passphrase = TESTNET } = {}) {
+// Set EXPIRY_ONLY=true (with a backend started with PAYMENT_TTL_MINUTES=1) to run just the expiry case.
+const EXPIRY_ONLY = process.env.EXPIRY_ONLY === "true";
+
+/**
+ * Opens a checkout with a stand-in wallet. `mode` covers connection behaviour; once the
+ * page is open, the wallet can be steered from the test through `window.__wallet`:
+ *   sign: "ok" | "reject" | "hang"   how the next signature request behaves
+ *   locked: true                     the wallet reports no address, as when locked
+ */
+async function open(paymentId, { mode = "ok", mobile = false, passphrase = TESTNET, signer = customer } = {}) {
   const context = await browser.newContext({
     viewport: mobile ? { width: 390, height: 844 } : { width: 1440, height: 900 },
     deviceScaleFactor: 2,
@@ -62,7 +71,7 @@ async function open(paymentId, { mode = "ok", mobile = false, passphrase = TESTN
   page.on("console", (message) => message.type() === "error" && errors.push(message.text()));
   await page.exposeFunction("__sign", (xdr, networkPassphrase) => {
     const tx = TransactionBuilder.fromXDR(xdr, networkPassphrase);
-    tx.sign(customer);
+    tx.sign(signer);
     return tx.toXDR();
   });
   await page.addInitScript(
@@ -73,12 +82,18 @@ async function open(paymentId, { mode = "ok", mobile = false, passphrase = TESTN
           if (mode === "reject") throw new Error("declined");
           return { address };
         },
-        getAddress: async () => address,
+        getAddress: async () => (window.__wallet.locked ? null : address),
         getNetworkPassphrase: async () => passphrase,
-        signTransaction: (xdr, opts) => window.__sign(xdr, opts.networkPassphrase),
+        signTransaction: async (xdr, opts) => {
+          // "hang" models a wallet prompt left open: wait until the test decides.
+          while (window.__wallet.sign === "hang") await new Promise((resolve) => setTimeout(resolve, 100));
+          if (window.__wallet.sign === "reject") throw new Error("declined");
+          return window.__sign(xdr, opts.networkPassphrase);
+        },
       };
+      window.__wallet = { sign: "ok", locked: false };
     },
-    { address: customer.publicKey(), mode, passphrase },
+    { address: signer.publicKey(), mode, passphrase },
   );
   await page.goto(`${FRONTEND}/c/${paymentId}`, { waitUntil: "networkidle" });
   return { page, errors, close: () => context.close() };
@@ -95,6 +110,7 @@ async function connectFreighter(page) {
   await page.getByRole("dialog").getByRole("button", { name: /Freighter/ }).click();
 }
 
+if (!EXPIRY_ONLY) {
 console.log("\nHappy path (desktop)");
 {
   const id = await createPayment("25.00");
@@ -177,6 +193,139 @@ console.log("\nMobile");
   await page.getByRole("button", { name: /^Pay \$12\.50 USDC$/ }).click();
   check("07 success on mobile", await sees(page, "Payment successful", 60_000));
   await page.waitForTimeout(1600); await shot(page, "m-07-success");
+  check("no browser errors", errors.length === 0, errors.join(" | "));
+  await close();
+}
+
+console.log("\nWallet prompt: cancel, decline, disconnect");
+{
+  const id = await createPayment("4.00", "Prompt cases");
+  const { page, errors, close } = await open(id);
+  await connectFreighter(page);
+  await sees(page, "Available balance");
+
+  await page.evaluate(() => (window.__wallet.sign = "hang"));
+  await page.getByRole("button", { name: /^Pay \$4 USDC$/ }).click();
+  check("05 waits for approval while the wallet prompt is open", await sees(page, "Waiting for approval"));
+  await settle(page); await shot(page, "05-waiting-for-approval");
+  check("05 the payment is marked as started", (await merchant("GET", `/payments/${id}`)).status === "PAYMENT_INITIATED");
+  await page.getByRole("button", { name: "Cancel" }).click();
+  check("05 cancel returns to review", await sees(page, "Available balance"));
+  check("05 cancel releases the payment", (await merchant("GET", `/payments/${id}`)).status === "AWAITING_PAYMENT");
+  // The abandoned prompt is approved late; its signature must be ignored.
+  await page.evaluate(() => (window.__wallet.sign = "ok"));
+  await page.waitForTimeout(2500);
+  check("05 a late signature from a cancelled prompt is not submitted", (await merchant("GET", `/payments/${id}`)).status === "AWAITING_PAYMENT");
+
+  await page.evaluate(() => (window.__wallet.sign = "reject"));
+  await page.getByRole("button", { name: /^Pay \$4 USDC$/ }).click();
+  check("declining in the wallet returns to review", (await sees(page, "Available balance")) && (await merchant("GET", `/payments/${id}`)).status === "AWAITING_PAYMENT");
+
+  await page.evaluate(() => (window.__wallet.locked = true));
+  check("15 a locked wallet is noticed on the review screen", await sees(page, "Wallet disconnected", 10_000));
+  await settle(page); await shot(page, "15-wallet-disconnected");
+  await page.evaluate(() => ((window.__wallet.locked = false), (window.__wallet.sign = "ok")));
+  await page.getByRole("button", { name: "Reconnect wallet" }).click();
+  check("15 reconnecting returns to review", await sees(page, "Available balance"));
+  await page.getByRole("button", { name: /^Pay \$4 USDC$/ }).click();
+  check("the payment still completes afterwards", await sees(page, "Payment successful", 60_000));
+  check("no browser errors", errors.length === 0, errors.join(" | "));
+  await close();
+}
+
+const horizon = new Horizon.Server("https://horizon-testnet.stellar.org");
+const usdc = new Asset("USDC", process.env.USDC_ISSUER);
+async function send(source, ...operations) {
+  const builder = new TransactionBuilder(await horizon.loadAccount(source.publicKey()), { fee: BASE_FEE, networkPassphrase: Networks.TESTNET }).setTimeout(60);
+  for (const operation of operations) builder.addOperation(operation);
+  const tx = builder.build();
+  tx.sign(source);
+  return horizon.submitTransaction(tx);
+}
+
+console.log("\nNot enough XLM for the fee");
+{
+  // A wallet holding USDC but only its minimum XLM reserve.
+  const broke = Keypair.random();
+  const funded = await fetch(`https://friendbot.stellar.org?addr=${broke.publicKey()}`);
+  check("test account funded", funded.ok);
+  await send(broke, Operation.changeTrust({ asset: usdc }));
+  await send(customer, Operation.payment({ destination: broke.publicKey(), asset: usdc, amount: "10" }));
+  const xlm = (await horizon.loadAccount(broke.publicKey())).balances.find((b) => b.asset_type === "native").balance;
+  // Reserve for the account plus one trustline is 1.5 XLM; send away everything else.
+  await send(broke, Operation.payment({ destination: customer.publicKey(), asset: Asset.native(), amount: (Number(xlm) - 1.5 - 0.00001).toFixed(7) }));
+
+  const id = await createPayment("2.00", "Fee case");
+  const { page, close } = await open(id, { signer: broke });
+  await connectFreighter(page);
+  check("09 explains that XLM is needed for the fee", (await sees(page, "Not enough XLM for the fee")) && (await sees(page, "XLM is the fee token")));
+  await settle(page); await shot(page, "09-insufficient-xlm");
+  await close();
+}
+
+console.log("\nA transaction that fails on Stellar, then a retry");
+{
+  const merchantKey = Keypair.fromSecret(process.env.MERCHANT_SECRET);
+  const balance = (await horizon.loadAccount(merchantKey.publicKey())).balances.find((b) => b.asset_code === "USDC" && b.asset_issuer === usdc.getIssuer()).balance;
+  const id = await createPayment("6.00", "Failure case");
+  const { page, errors, close } = await open(id);
+  await connectFreighter(page);
+  await sees(page, "Available balance");
+  // Cap the merchant's USDC trustline at its current balance, so the incoming payment
+  // is accepted by the network but fails when applied.
+  await send(merchantKey, Operation.changeTrust({ asset: usdc, limit: balance }));
+  try {
+    await page.getByRole("button", { name: /^Pay \$6 USDC$/ }).click();
+    check("10 shows payment failed", await sees(page, "Payment failed", 60_000));
+    await settle(page); await shot(page, "10-payment-failed");
+    const failed = await merchant("GET", `/payments/${id}`);
+    check("the backend recorded the failure and did not mark it paid", failed.status === "FAILED" && failed.verification?.transactionSuccessful === false, `${failed.status} ${failed.failureReason}`);
+    console.log(`        reason: ${failed.failureReason}`);
+  } finally {
+    await send(merchantKey, Operation.changeTrust({ asset: usdc }));
+  }
+  await page.getByRole("button", { name: "Try again" }).click();
+  check("10 try again returns to review", await sees(page, "Available balance"));
+  await page.getByRole("button", { name: /^Pay \$6 USDC$/ }).click();
+  check("the retry succeeds", await sees(page, "Payment successful", 60_000));
+  check("the backend marks the retried payment paid", (await merchant("GET", `/payments/${id}`)).status === "PAID");
+  check("no browser errors", errors.length === 0, errors.join(" | "));
+  await close();
+}
+
+console.log("\nReloading while the payment is confirming");
+{
+  const id = await createPayment("1.00", "Reload case");
+  const { page, close } = await open(id);
+  await connectFreighter(page);
+  await sees(page, "Available balance");
+  await page.getByRole("button", { name: /^Pay \$1 USDC$/ }).click();
+  await sees(page, "Processing payment");
+  await page.reload({ waitUntil: "domcontentloaded" });
+  const landed = (await sees(page, "Payment pending", 8_000)) ? "pending" : (await sees(page, "Already paid", 2_000)) ? "paid" : "other";
+  // Confirmation normally takes a few seconds, so the reload lands on "pending"; if Stellar
+  // was unusually fast it lands on "already paid". It must never land back at the start.
+  check("11 a reload mid-payment does not restart the checkout", landed !== "other", landed);
+  if (landed === "pending") {
+    await settle(page); await shot(page, "11-payment-pending");
+    check("11 pending turns into success on its own", await sees(page, "Payment successful", 60_000));
+  }
+  await close();
+}
+}
+
+if (EXPIRY_ONLY) {
+  console.log("\nExpiry while the customer is on the checkout (needs PAYMENT_TTL_MINUTES=1)");
+  const id = await createPayment("7.00", "Expiry case");
+  const { page, errors, close } = await open(id);
+  await connectFreighter(page);
+  check("review screen is open", await sees(page, "Available balance"));
+  check("13 the checkout expires in front of the customer", await sees(page, "Payment expired", 130_000));
+  await settle(page); await shot(page, "13-payment-expired");
+  check("13 offers the way back to the merchant", (await page.getByRole("link", { name: "Return to Merchant" }).count()) === 1);
+  check("the backend marked it expired", (await merchant("GET", `/payments/${id}`)).status === "EXPIRED");
+  await page.reload({ waitUntil: "networkidle" });
+  check("13 an expired link stays expired on reload", await sees(page, "Payment expired"));
   check("no browser errors", errors.length === 0, errors.join(" | "));
   await close();
 }

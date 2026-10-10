@@ -66,6 +66,8 @@ from the backend's `.env.testnet`.
 The checkout check replaces the Freighter extension (which cannot be automated) with a stand-in that
 signs with the Testnet customer key. It needs the frontend started with `NEXT_PUBLIC_TEST_WALLET=true`,
 and `FRONTEND_URL` / `API_URL` pointing at the running servers. Never set that flag in production.
+To cover a checkout expiring in front of the customer, start the backend with `PAYMENT_TTL_MINUTES=1`
+and run the same script with `EXPIRY_ONLY=true`.
 
 ## Contract with the backend
 
