@@ -69,9 +69,38 @@
 html.motion [data-split],
 html.motion [data-words],
 html.motion [data-fade],
-html.motion [data-clip],
-html.motion [data-hero] {
+html.motion [data-clip] {
   visibility: hidden;
+}
+
+/*
+ * The hero holds the page's largest element, so how it appears decides the LCP score.
+ * On large screens it waits for its scripted entrance. On small screens, where devices
+ * and connections are slower, it is visible from the first paint and its entrance is
+ * done in CSS with transforms only, which never delay rendering.
+ */
+@media (min-width: 1024px) {
+  html.motion [data-hero] {
+    visibility: hidden;
+  }
+}
+@media (max-width: 1023.98px) {
+  html.motion [data-hero-image] {
+    animation: hero-zoom 2.2s var(--ease-out-expo) both;
+  }
+  html.motion [data-hero-phone] {
+    animation: hero-rise 1.5s var(--ease-out-expo) both;
+  }
+}
+@keyframes hero-zoom {
+  from {
+    transform: scale(1.25);
+  }
+}
+@keyframes hero-rise {
+  from {
+    transform: translateY(35%);
+  }
 }
 
 /* Call-to-action label that rolls up and is replaced by a copy of itself on hover. */

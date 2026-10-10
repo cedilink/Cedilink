@@ -54,11 +54,12 @@ export function LandingMotion({ children }: { children: ReactNode }) {
         };
         document.addEventListener("click", onAnchor);
 
-        // ── Hero: plays once on load ──
-        const heroTitle = q("[data-hero-title]")[0];
-        const hero = gsap.timeline({ defaults: { ease: EASE } });
+        // ── Hero: plays once on load. Large screens only; on small screens the hero is
+        // already on screen and its entrance is CSS (see globals.css). ──
+        const heroTitle = desktop ? q("[data-hero-title]")[0] : undefined;
+        const hero = gsap.timeline({ defaults: { ease: EASE }, paused: !desktop });
         gsap.set(q("[data-hero]"), { autoAlpha: 1 });
-        hero
+        if (desktop) hero
           .fromTo(q("[data-hero-panel]"), { clipPath: "inset(100% 0% 0% 0% round 20px)" }, { clipPath: "inset(0% 0% 0% 0% round 20px)", duration: 1.3, stagger: 0.12 })
           .fromTo(q("[data-hero-image]"), { scale: 1.3 }, { scale: 1, duration: 2.2 }, 0)
           .fromTo(q("[data-hero-phone]"), { yPercent: 45, rotate: 3 }, { yPercent: 0, rotate: 0, duration: 1.5, ease: "back.out(1.1)" }, 0.35)
@@ -109,6 +110,9 @@ export function LandingMotion({ children }: { children: ReactNode }) {
           gsap.set(element, { autoAlpha: 1 });
           SplitText.create(element, {
             type: "words",
+            // The words stay ordinary text for screen readers. (The default labels the
+            // element instead, which is not allowed on a paragraph.)
+            aria: "none",
             autoSplit: true,
             onSplit: (self) =>
               gsap.fromTo(self.words, { opacity: 0.14 }, { opacity: 1, stagger: 0.12, ease: "none", scrollTrigger: { trigger: element, start: "top 85%", end: "top 40%", scrub: true } }),
