@@ -59,3 +59,49 @@
   line-height: 1;
   font-weight: 500;
 }
+
+/*
+ * Landing page reveals. `motion` is added to <html> by a small inline script before
+ * first paint (only when the visitor allows motion), so elements that animate in are
+ * never seen in their final position first. Without JavaScript the class is absent
+ * and everything is simply visible.
+ */
+html.motion [data-split],
+html.motion [data-words],
+html.motion [data-fade],
+html.motion [data-clip],
+html.motion [data-hero] {
+  visibility: hidden;
+}
+
+/* Call-to-action label that rolls up and is replaced by a copy of itself on hover. */
+.cta-roll {
+  position: relative;
+  display: inline-block;
+  overflow: hidden;
+}
+.cta-roll > span {
+  display: block;
+  transition: transform 0.5s var(--ease-out-expo);
+}
+.cta-roll > span + span {
+  position: absolute;
+  inset: 0;
+  transform: translateY(110%);
+}
+@media (hover: hover) {
+  a:hover > .cta-roll > span:first-child {
+    transform: translateY(-110%);
+  }
+  a:hover > .cta-roll > span + span {
+    transform: translateY(0);
+  }
+}
+
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+.lenis.lenis-stopped {
+  overflow: hidden;
+}

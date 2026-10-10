@@ -1,6 +1,6 @@
 # Credlink Smartpay — Frontend
 
-Next.js app for Credlink Smartpay: the customer checkout and the merchant dashboard, with the landing page to come.
+Next.js app for Credlink Smartpay: the landing page, the customer checkout and the merchant dashboard.
 
 Plan and rationale: [docs/plans/implementation-plan.md](docs/plans/implementation-plan.md). Designs: `ui-assets/`.
 
@@ -21,8 +21,18 @@ are forwarded, which keeps the merchant session cookie first-party.
 | Route | Status |
 |---|---|
 | `/c/[paymentId]` | Customer checkout: all 16 designed screens, Freighter wallet, live status |
-| `/` | Placeholder; landing page to come |
+| `/` | Landing page with scroll-driven animation |
 | `/login`, `/dashboard/*` | Merchant dashboard: overview, payments list and details, create payment, Stellar USDC settings, live updates |
+
+### Landing page
+
+- Sections in `src/components/landing/sections.tsx` are plain markup that opt in to animation with
+  data attributes (`data-split`, `data-fade`, `data-clip`, …).
+- `landing-motion.tsx` owns all scroll-driven animation (GSAP, ScrollTrigger, SplitText, Lenis) and
+  documents each attribute. `checkout-scene.tsx` is the pinned scene that steps a phone through a checkout.
+- Product screens shown on the page (`mocks.tsx`) are real markup built from the checkout's own parts.
+- GSAP animates what follows the scroll; Motion animates what follows React state. Nothing is
+  animated for visitors who prefer reduced motion.
 
 ### Checkout
 
@@ -49,6 +59,7 @@ from the backend's `.env.testnet`.
 |---|---|
 | `npm run typecheck`, `npm run lint` | Types and lint |
 | `npx vitest run` | Checkout state machine |
+| `node scripts/landing-browser-check.mjs` | The landing page in Chrome: scrolls through on desktop, mobile and with reduced motion |
 | `node scripts/checkout-browser-check.mjs` | The checkout in Chrome, end to end against a running backend on Testnet |
 | `node scripts/dashboard-browser-check.mjs` | The dashboard in Chrome, including a live payment arriving; expects a freshly seeded database |
 
