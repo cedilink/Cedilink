@@ -37,6 +37,8 @@ export interface CheckoutState {
   external: boolean;
   /** A connect or preflight request is running. */
   connecting: boolean;
+  /** Code of the last problem, so a screen shared by several causes can say which one it was. */
+  problemCode: string | null;
 }
 
 export type CheckoutEvent =
@@ -95,6 +97,7 @@ export function initialState(checkout: Pick<Checkout, "status" | "transactionHas
     submitted: IN_FLIGHT.includes(checkout.status),
     external: false,
     connecting: false,
+    problemCode: null,
   };
   // Opening or reloading the link lands on the screen that matches the payment's real state.
   if (checkout.status === "PAID") return { ...base, screen: "alreadyPaid" };
@@ -180,6 +183,7 @@ export function reduce(state: CheckoutState, event: CheckoutEvent): CheckoutStat
         connecting: false,
         walletPickerOpen: false,
         preflight: event.preflight ?? state.preflight,
+        problemCode: event.code,
         screen: screenForProblem(event.code),
       };
 

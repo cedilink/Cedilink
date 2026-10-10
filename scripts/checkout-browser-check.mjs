@@ -263,6 +263,20 @@ console.log("\nNot enough XLM for the fee");
   await close();
 }
 
+console.log("\nA Testnet wallet that has not added this USDC");
+{
+  // Exists on Testnet and has XLM, but no trustline: what a tester's own account looks like.
+  const stranger = Keypair.random();
+  check("test account funded", (await fetch(`https://friendbot.stellar.org?addr=${stranger.publicKey()}`)).ok);
+  const id = await createPayment("2.00", "Trustline case");
+  const { page, close } = await open(id, { signer: stranger });
+  await connectFreighter(page);
+  check("12 says the wallet is on the right network but lacks the asset", (await sees(page, "hasn't added the USDC this merchant accepts")) && (await sees(page, "Issuer")));
+  check("12 does not blame the network", !(await sees(page, "Switch your wallet", 1_000)));
+  await settle(page); await shot(page, "12-missing-trustline");
+  await close();
+}
+
 console.log("\nA transaction that fails on Stellar, then a retry");
 {
   const merchantKey = Keypair.fromSecret(process.env.MERCHANT_SECRET);

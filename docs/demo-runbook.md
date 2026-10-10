@@ -59,7 +59,7 @@ Points worth saying aloud:
 | What you see | Cause | Fix |
 |---|---|---|
 | "Freighter not found" | The extension is missing or disabled in this browser. | Install or enable Freighter, then choose **Choose another wallet** and pick Freighter again. |
-| "Wrong network or asset" | Freighter is on Mainnet, or a different account is selected. | Switch Freighter to Testnet and select the imported demo account, then **Try again**. |
+| "Wrong network or asset" | The screen says which: the wallet is on another network, or the selected account has not added the USDC this environment accepts. Any account other than the imported demo customer will hit the second case. | Switch Freighter to Testnet and select the imported demo account, then **Try again**. To use a different account, fund it first with `npm run testnet:fund` in the backend folder. |
 | "Not enough USDC" | The demo customer account has run low. | Use a smaller amount, or re-run the Testnet setup (below). |
 | "Payment expired" | The checkout was created more than 30 minutes ago. | Create a new payment. |
 | "Payment pending" for more than a minute | Testnet is slow. | Wait; the page updates on its own. Do not pay again. |

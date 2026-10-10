@@ -359,12 +359,49 @@ export function Pending({ checkout, controller }: Props) {
   );
 }
 
+/**
+ * Design 12 covers three different causes. The title follows the design; the message and
+ * the note say which cause applies and what to do about it.
+ */
 export function WrongNetwork({ checkout, controller }: Props) {
+  const code = controller.state.problemCode;
+  const { asset, assetIssuer, network } = checkout;
+
+  let message = `Please make sure you're paying with Stellar ${asset}.`;
+  let help: React.ReactNode = (
+    <Note>
+      Switch your wallet to {network.label} and pay with {asset}.
+    </Note>
+  );
+  if (code === "ACCOUNT_NOT_FOUND") {
+    message = `This account doesn't exist on ${network.label} yet.`;
+    help = <Note>Fund the account with XLM on {network.label}, add {asset} to it, then try again.</Note>;
+  } else if (code === "NO_USDC_TRUSTLINE") {
+    message = `Your wallet is on ${network.label}, but it hasn't added the ${asset} this merchant accepts.`;
+    help = (
+      <>
+        {assetIssuer ? (
+          <Panel>
+            <Row label="Asset code">{asset}</Row>
+            <Row label="Issuer">
+              <span className="min-w-0 truncate">{truncateAddress(assetIssuer, 6, 6)}</span>
+              <CopyButton value={assetIssuer} label="issuer" />
+            </Row>
+          </Panel>
+        ) : null}
+        <Note>
+          In your wallet, add an asset with this code and issuer, make sure it holds enough {asset}, then try again. A token named {asset} from a
+          different issuer will not work.
+        </Note>
+      </>
+    );
+  }
+
   return (
     <StatusScreen
       icon={alert}
       title="Wrong network or asset"
-      message="Please make sure you're paying with Stellar USDC."
+      message={message}
       actions={
         <>
           <Button onClick={controller.retry} disabled={controller.state.connecting}>Try again</Button>
@@ -372,9 +409,7 @@ export function WrongNetwork({ checkout, controller }: Props) {
         </>
       }
     >
-      <Note>
-        Switch your wallet to {checkout.network.label} and pay with {checkout.asset}.
-      </Note>
+      {help}
     </StatusScreen>
   );
 }

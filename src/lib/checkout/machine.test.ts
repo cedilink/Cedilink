@@ -96,6 +96,12 @@ describe("checkout machine", () => {
     expect(run(s, { type: "STATUS", status: "PAID", transactionHash: "ab" }).screen).toBe("alreadyPaid");
   });
 
+  it("remembers which problem led to a shared screen", () => {
+    const s = run(fresh(), { type: "CONTINUE" }, { type: "PROBLEM", code: "NO_USDC_TRUSTLINE" });
+    expect(s.screen).toBe("wrongNetwork");
+    expect(s.problemCode).toBe("NO_USDC_TRUSTLINE");
+  });
+
   it("handles wallet connection failures", () => {
     const open = run(fresh(), { type: "CONTINUE" }, { type: "OPEN_WALLETS" }, { type: "CONNECTING", walletId: "freighter" });
     expect(run(open, { type: "WALLET_MISSING" }).screen).toBe("walletNotInstalled");
