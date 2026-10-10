@@ -169,6 +169,7 @@ console.log("\nProblems");
   const a = await open(big);
   await connectFreighter(a.page);
   check("08 not enough USDC, with balance and amount needed", (await sees(a.page, "Not enough USDC")) && (await sees(a.page, "Needed 500000.00 USDC")));
+  check("08 offers test USDC on Testnet", (await a.page.getByRole("button", { name: "Get test USDC" }).count()) === 1);
   await settle(a.page); await shot(a.page, "08-insufficient-usdc");
   await a.close();
 
@@ -304,6 +305,26 @@ console.log("\nA Testnet wallet that has not added this USDC");
   ({ page, close } = await open(id, { signer: stranger }));
   await connectFreighter(page);
   check("12 names the look-alike token the wallet holds", (await sees(page, "holds 9300.00 USDC, but from a different issuer")) && (await sees(page, "Yours is issued by")));
+  await settle(page); await shot(page, "12-lookalike-with-top-up");
+
+  // On Testnet that same screen can fix the wallet in one approval.
+  await page.getByRole("button", { name: "Get test USDC" }).click();
+  check("12 Get test USDC leads straight to the review screen", await sees(page, "Available balance", 60_000));
+  check("the wallet now holds exactly what the payment needs", await sees(page, "2.00 USDC"));
+  await page.getByRole("button", { name: /^Pay \$2 USDC$/ }).click();
+  check("and the payment succeeds", await sees(page, "Payment successful", 60_000));
+  await close();
+
+  // A wallet whose account does not exist on Testnet at all, as with a fresh Albedo account.
+  const nobody = Keypair.random();
+  const id2 = await createPayment("3.00", "New account case");
+  ({ page, close } = await open(id2, { signer: nobody }));
+  await connectFreighter(page);
+  check("12 says the account does not exist on Testnet", await sees(page, "doesn't exist on Stellar Testnet yet"));
+  await page.getByRole("button", { name: "Get test USDC" }).click();
+  check("12 Get test USDC creates and funds the account", await sees(page, "Available balance", 90_000));
+  await page.getByRole("button", { name: /^Pay \$3 USDC$/ }).click();
+  check("and that payment succeeds too", await sees(page, "Payment successful", 60_000));
   await settle(page); await shot(page, "12-missing-trustline");
   await close();
 }

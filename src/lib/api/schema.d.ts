@@ -228,6 +228,46 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/checkout/{paymentId}/top-up": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Testnet only: transaction that gives the wallet the USDC this payment needs
+         * @description Error codes: TOP_UP_UNAVAILABLE, TOP_UP_NOT_NEEDED, TOP_UP_FAILED, INSUFFICIENT_XLM, INVALID_WALLET.
+         */
+        post: operations["createCheckoutTopUp"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/checkout/{paymentId}/top-up/submit": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Testnet only: submit the signed top-up
+         * @description Error codes: ENVELOPE_MISMATCH, INVALID_TRANSACTION, TOP_UP_FAILED.
+         */
+        post: operations["submitCheckoutTopUp"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/checkout/{paymentId}/transaction": {
         parameters: {
             query?: never;
@@ -560,6 +600,13 @@ export interface components {
                 issuer: string;
                 balance: string;
             } | null;
+            topUpAvailable: boolean;
+        };
+        TopUp: {
+            xdr: string;
+            networkPassphrase: string;
+            usdcAmount: string;
+            xlmCost: string;
         };
         BuiltTransaction: {
             xdr: string;
@@ -1049,6 +1096,84 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Preflight"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    createCheckoutTopUp: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @example SP-00124 */
+                paymentId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    customerWallet: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TopUp"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    submitCheckoutTopUp: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @example SP-00124 */
+                paymentId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    signedXdr: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        ok: boolean;
+                    };
                 };
             };
             /** @description Error */

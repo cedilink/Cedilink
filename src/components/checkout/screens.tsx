@@ -271,13 +271,42 @@ export function Success({ checkout, controller }: Props) {
 
 const alert = <Badge tone="alert" />;
 
+/**
+ * Testnet only. Offered when the wallet lacks the USDC to pay: one approval adds the asset
+ * and swaps some of the wallet's own test XLM for the amount needed.
+ */
+function TopUp({ checkout, controller }: Props) {
+  if (!controller.state.preflight?.topUpAvailable) return null;
+  const busy = controller.state.toppingUp;
+  return (
+    <>
+      <Note>
+        This is {checkout.network.label}, so you can get test {checkout.asset} here: approve one transaction and some of your wallet&apos;s test XLM is
+        swapped for the {checkout.asset} this payment needs.
+      </Note>
+      <Button onClick={controller.topUp} disabled={busy || controller.state.connecting}>
+        {busy ? (
+          <>
+            <Spinner className="size-4" /> Getting test {checkout.asset}…
+          </>
+        ) : (
+          `Get test ${checkout.asset}`
+        )}
+      </Button>
+    </>
+  );
+}
+
+/** "Try again" is the main action unless a top-up is on offer, in which case it steps back. */
+const retryVariant = (controller: CheckoutController) => (controller.state.preflight?.topUpAvailable ? "outline" : "ink");
+
 const OtherMethod = ({ controller }: Pick<Props, "controller">) => (
   <Button variant="outline" onClick={controller.disconnect}>
     Choose another payment method
   </Button>
 );
 
-export function InsufficientUsdc({ controller }: Props) {
+export function InsufficientUsdc({ checkout, controller }: Props) {
   const p = controller.state.preflight;
   return (
     <StatusScreen
@@ -286,7 +315,10 @@ export function InsufficientUsdc({ controller }: Props) {
       message="You don't have enough USDC to complete this payment."
       actions={
         <>
-          <Button onClick={controller.retry} disabled={controller.state.connecting}>Try again</Button>
+          <TopUp checkout={checkout} controller={controller} />
+          <Button variant={retryVariant(controller)} onClick={controller.retry} disabled={controller.state.connecting || controller.state.toppingUp}>
+            Try again
+          </Button>
           <OtherMethod controller={controller} />
         </>
       }
@@ -375,7 +407,7 @@ export function WrongNetwork({ checkout, controller }: Props) {
   );
   if (code === "ACCOUNT_NOT_FOUND") {
     message = `This account doesn't exist on ${network.label} yet.`;
-    help = <Note>Fund the account with XLM on {network.label}, add {asset} to it, then try again.</Note>;
+    help = controller.state.preflight?.topUpAvailable ? null : <Note>Fund the account with XLM on {network.label}, add {asset} to it, then try again.</Note>;
   } else if (code === "NO_USDC_TRUSTLINE") {
     // A wallet often "has USDC" that is a different token with the same name.
     const lookalike = controller.state.preflight?.lookalike;
@@ -399,10 +431,10 @@ export function WrongNetwork({ checkout, controller }: Props) {
             </Row>
           </Panel>
         ) : null}
-        <Note>
-          In your wallet, add an asset with this code and issuer, make sure it holds enough {asset}, then try again.
-          {network.id === "testnet" ? ` On Testnet you can get it by swapping some XLM for this ${asset} in your wallet.` : ""}
-        </Note>
+        {/* With a top-up on offer the button does this for them, so the manual steps would only add noise. */}
+        {controller.state.preflight?.topUpAvailable ? null : (
+          <Note>In your wallet, add an asset with this code and issuer, make sure it holds enough {asset}, then try again.</Note>
+        )}
       </>
     );
   }
@@ -414,7 +446,10 @@ export function WrongNetwork({ checkout, controller }: Props) {
       message={message}
       actions={
         <>
-          <Button onClick={controller.retry} disabled={controller.state.connecting}>Try again</Button>
+          <TopUp checkout={checkout} controller={controller} />
+          <Button variant={retryVariant(controller)} onClick={controller.retry} disabled={controller.state.connecting || controller.state.toppingUp}>
+            Try again
+          </Button>
           <OtherMethod controller={controller} />
         </>
       }

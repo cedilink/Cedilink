@@ -146,6 +146,34 @@ export function useCheckout(checkout: Checkout) {
     }
   }, [wallet, path, reportProblem]);
 
+  /**
+   * Testnet only: one wallet approval that adds the accepted USDC to the wallet and swaps
+   * enough of its own test XLM to cover this payment, then checks the wallet again.
+   */
+  const topUp = useCallback(async () => {
+    const walletId = state.lastWalletId;
+    const address = state.preflight?.wallet;
+    if (!walletId || !address) return;
+    dispatch({ type: "TOP_UP", running: true });
+    try {
+      const built = await api<{ xdr: string; networkPassphrase: string }>(`${path}/top-up`, { method: "POST", body: { customerWallet: address } });
+      let signedXdr: string;
+      try {
+        signedXdr = await getWallet(walletId).signTransaction(built.xdr, { networkPassphrase: built.networkPassphrase, address });
+      } catch {
+        return; // Declined in the wallet: stay on the same screen.
+      }
+      await api(`${path}/top-up/submit`, { method: "POST", body: { signedXdr } });
+      await connect(walletId);
+    } catch (error) {
+      // "Not needed" means the wallet is already funded; checking it again moves on.
+      if (error instanceof ApiError && error.code === "TOP_UP_NOT_NEEDED") await connect(walletId);
+      else reportProblem(error);
+    } finally {
+      dispatch({ type: "TOP_UP", running: false });
+    }
+  }, [state.lastWalletId, state.preflight, path, connect, reportProblem]);
+
   const cancelApproval = useCallback(async () => {
     attempt.current++;
     await api(`${path}/cancel`, { method: "POST" }).catch(() => {});
@@ -164,6 +192,7 @@ export function useCheckout(checkout: Checkout) {
     connect,
     pay,
     cancelApproval,
+    topUp,
     retry,
     refreshStatus,
     next: () => dispatch({ type: "CONTINUE" }),

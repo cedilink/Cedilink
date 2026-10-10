@@ -37,6 +37,8 @@ export interface CheckoutState {
   external: boolean;
   /** A connect or preflight request is running. */
   connecting: boolean;
+  /** A Testnet top-up (add USDC and swap XLM for it) is being approved or submitted. */
+  toppingUp: boolean;
   /** Code of the last problem, so a screen shared by several causes can say which one it was. */
   problemCode: string | null;
 }
@@ -58,7 +60,8 @@ export type CheckoutEvent =
   | { type: "SUBMITTED"; status: PaymentStatus; transactionHash: string | null }
   | { type: "STATUS"; status: PaymentStatus; transactionHash: string | null; paidAt?: string | null }
   | { type: "PROBLEM"; code: string; preflight?: Preflight }
-  | { type: "STILL_PENDING" };
+  | { type: "STILL_PENDING" }
+  | { type: "TOP_UP"; running: boolean };
 
 const IN_FLIGHT: PaymentStatus[] = ["TRANSACTION_SUBMITTED", "CONFIRMING"];
 
@@ -98,6 +101,7 @@ export function initialState(checkout: Pick<Checkout, "status" | "transactionHas
     external: false,
     connecting: false,
     problemCode: null,
+    toppingUp: false,
   };
   // Opening or reloading the link lands on the screen that matches the payment's real state.
   if (checkout.status === "PAID") return { ...base, screen: "alreadyPaid" };
@@ -186,6 +190,9 @@ export function reduce(state: CheckoutState, event: CheckoutEvent): CheckoutStat
         problemCode: event.code,
         screen: screenForProblem(event.code),
       };
+
+    case "TOP_UP":
+      return { ...state, toppingUp: event.running };
 
     case "STILL_PENDING":
       return state.screen === "processing" ? { ...state, screen: "pending" } : state;
