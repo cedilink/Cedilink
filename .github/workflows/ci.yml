@@ -12,7 +12,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          # Same major version as local development; its npm reads this lock file correctly.
+          # Same major version as local development.
           node-version: 24
           cache: npm
       - run: npm ci
