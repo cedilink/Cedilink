@@ -1,183 +1,57 @@
-# 🇬🇭 CediLink
+# Credlink Smartpay — Frontend
 
-### Connecting Digital Assets to Local Cash.
+Next.js app for Credlink Smartpay: the customer checkout, and (to come) the landing page and merchant dashboard.
 
-**CediLink** is a peer-to-peer cash-in and cash-out network designed to connect people holding **USDC on Stellar** with trusted local cash agents.
+Plan and rationale: [docs/plans/implementation-plan.md](docs/plans/implementation-plan.md). Designs: `ui-assets/`.
 
-The platform makes it easier for users to discover nearby cash agents, compare rates and services, and complete cash exchanges through a secure transaction workflow.
+## Run
 
+```bash
+npm install
+cp .env.example .env.local    # set API_URL to the backend
+npm run dev                   # http://localhost:3000
+```
 
-## 💡 What is CediLink?
+`API_URL` is the backend's base address (for example `https://credlink-api.pipeops.app`, or
+`http://localhost:4000`). The browser never calls it directly: requests go to `/api/*` on this app and
+are forwarded, which keeps the merchant session cookie first-party.
 
-CediLink creates a network of **local cash access points** for Stellar users.
+## What is built
 
-Instead of relying solely on formal anchors or centralized cash-out infrastructure, users can discover trusted agents in their area and initiate peer-to-peer cash exchanges.
+| Route | Status |
+|---|---|
+| `/c/[paymentId]` | Customer checkout: all 16 designed screens, Freighter wallet, live status |
+| `/` | Placeholder; landing page to come |
+| `/dashboard` | To come |
 
-### The goal?
+### Checkout
 
-Make accessing local cash from digital assets **simple, transparent, and accessible.**
+- `src/lib/checkout/machine.ts` is the state machine: one state per designed screen. The success
+  screen is reachable only when the backend reports the payment as paid.
+- `src/lib/checkout/use-checkout.ts` connects the machine to the wallet and the API.
+- `src/lib/wallets/` holds one adapter per wallet behind a shared interface. Freighter is on;
+  Albedo is implemented and switched on with `NEXT_PUBLIC_ALBEDO_ENABLED=true`.
+- `src/components/checkout/` holds the screens.
 
+To pay from a browser, install Freighter, switch it to Testnet, and import the customer secret key
+from the backend's `.env.testnet`.
 
-## 🗺️ How It Works
+## Checks
 
-### 1. Find an Agent
+| Command | What it covers |
+|---|---|
+| `npm run typecheck`, `npm run lint` | Types and lint |
+| `npx vitest run` | Checkout state machine |
+| `node scripts/checkout-browser-check.mjs` | The checkout in Chrome, end to end against a running backend on Testnet |
 
-Browse an interactive map to discover nearby cash agents.
+The browser check replaces the Freighter extension (which cannot be automated) with a stand-in that
+signs with the Testnet customer key. It needs the frontend started with `NEXT_PUBLIC_TEST_WALLET=true`,
+and `FRONTEND_URL` / `API_URL` pointing at the running servers. Never set that flag in production.
 
-### 2. Compare
+## Contract with the backend
 
-View available services, supported currencies, rates, and agent reputation.
+`src/lib/api/schema.d.ts` is generated from the backend's `openapi.json`. After the API changes:
 
-### 3. Initiate Exchange
-
-Select an agent and start a cash-in or cash-out transaction.
-
-### 4. Secure the Funds
-
-A **Soroban escrow contract** holds the user's digital funds during the transaction.
-
-### 5. Confirm & Release
-
-Once the cash handover is confirmed, the escrow releases the funds to the appropriate party.
-
-
-## 💰 For Users
-
-CediLink allows users to:
-
-*  Find nearby cash agents
-*  Cash out USDC
-*  Cash in through local agents
-*  Compare agent rates
-*  View agent reputation
-*  Benefit from escrow-protected transactions
-*  Access a local network of cash points
-
-
-## 🤝 For Cash Agents
-
-Agents can use CediLink to:
-
-*  Become discoverable to nearby users
-*  Offer cash-in and cash-out services
-*  Set available currencies and rates
-*  Build their reputation
-*  Serve users within their local community
-
-
-
-## ⚡ Why Stellar?
-
-CediLink uses **Stellar** as the digital asset settlement layer and **Soroban** for transaction escrow.
-
-This enables us to explore:
-
-* Fast digital settlement
-* Low-cost transactions
-* Stablecoin-based payments
-* Programmable escrow
-* Transparent transaction records
-
-
-
-##  Trust & Reputation
-
-Trust is a core part of CediLink.
-
-The platform is designed to provide users with information about agents before initiating an exchange, including:
-
-** Reputation**
-** Rates**
-** Available services**
-** Location**
-** Transaction activity**
-
-The escrow workflow adds an additional layer of protection during the exchange.
-
-## 🛠️ What We're Building
-
-Our initial prototype focuses on:
-
-### 1. Agent Discovery
-
-Interactive map showing available cash agents.
-
-### 2. Agent Profiles
-
-Rates, supported currencies, services, location, and reputation.
-
-### 3. Soroban Escrow
-
-Smart-contract workflow for securely holding and releasing digital funds.
-
-### 4. Cash Exchange Workflow
-
-End-to-end flow from agent selection to cash handover confirmation.
-
-
-##  Project Status
-
-**Prototype / Early Development**
-
-We're building and testing the core agent discovery, exchange, and escrow workflows.
-
-Early feedback will help us improve the experience and determine what is needed for broader adoption.
-
-
-
-##  Get Involved
-
-We're looking for:
-
- Developers
- Designers
- Fintech builders
- Cash agents
- Testers
- Product thinkers
- Community members
-
-You can contribute by:
-
-* Testing the prototype
-* Sharing feedback
-* Suggesting features
-* Helping identify local use cases
-* Exploring agent onboarding
-* Contributing to development
-
-
-
-## 💬 Discord Channels
-
-**📢 announcements**
-Important CediLink updates.
-
-**💬 general**
-Community conversations and introductions.
-
-**🗺️ agent-network**
-Discuss agent discovery and onboarding.
-
-**💡 product-feedback**
-Share product ideas and feedback.
-
-**🐛 bug-reports**
-Report issues during testing.
-
-**🛠️ builders**
-Technical discussions and development.
-
-**💱 cash-exchange**
-Discuss cash-in/cash-out workflows and use cases.
-
-
-
-# 🇬🇭 Join CediLink
-
-We're building a local network that connects **digital dollars with real-world cash access.**
-
-**Find. Exchange. Connect.**
-
-### CediLink — Your local bridge to digital money.
-
+```bash
+npm run api:types
+```

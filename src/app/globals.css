@@ -1,0 +1,61 @@
+@import "tailwindcss";
+
+/* Design tokens. Colours are read from the design files; adjust here, not in components. */
+@theme {
+  --font-sans: var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
+
+  --color-brand: #2330be;
+  --color-brand-hover: #1c279c;
+  --color-brand-tint: #e8eaf8;
+  --color-brand-wash: #edf0fe;
+
+  --color-ink: #242424;
+  --color-heading: #4d4d4d;
+  --color-muted: #6b7280;
+  --color-subtle: #9ca3af;
+  --color-line: #ececec;
+
+  --color-surface: #f7f7f7;
+  --color-card: #ffffff;
+  --color-cream: #fff4e2;
+
+  --color-paid: #0f7b4b;
+  --color-paid-tint: #e6f5ec;
+  --color-awaiting: #b45309;
+  --color-awaiting-tint: #fdf0dc;
+  --color-confirming: #2330be;
+  --color-confirming-tint: #e8eaf8;
+  --color-failed: #c81e1e;
+  --color-failed-tint: #fde8e8;
+
+  --radius-card: 1.25rem;
+  --radius-panel: 1.5rem;
+
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    background: var(--color-card);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+  }
+  ::selection {
+    background: var(--color-brand);
+    color: #fff;
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-brand);
+    outline-offset: 2px;
+  }
+}
+
+@utility text-display {
+  /* Large marketing headings: tight tracking and leading, as in the designs. */
+  letter-spacing: -0.045em;
+  line-height: 1;
+  font-weight: 500;
+}

@@ -1,0 +1,136 @@
+{
+  "photos/hero-clouds.jpg": [
+    1152,
+    928
+  ],
+  "photos/use-case-event-tickets.jpg": [
+    1376,
+    768
+  ],
+  "photos/use-case-design-deposits.jpg": [
+    1376,
+    768
+  ],
+  "photos/use-case-consultation.jpg": [
+    1376,
+    768
+  ],
+  "photos/hero-portrait.jpg": [
+    1200,
+    1800
+  ],
+  "illustrations/mascot.png": [
+    1024,
+    1024
+  ],
+  "mascot-layers": {
+    "canvas": [
+      1024,
+      1024
+    ],
+    "background": "#FFF4E2",
+    "layers": [
+      {
+        "file": "illustrations/mascot-layers/brow-left.png",
+        "bbox": [
+          309,
+          266,
+          459,
+          298
+        ]
+      },
+      {
+        "file": "illustrations/mascot-layers/brow-right.png",
+        "bbox": [
+          543,
+          266,
+          693,
+          298
+        ]
+      },
+      {
+        "file": "illustrations/mascot-layers/eye-left.png",
+        "bbox": [
+          246,
+          331,
+          475,
+          560
+        ]
+      },
+      {
+        "file": "illustrations/mascot-layers/eye-right.png",
+        "bbox": [
+          542,
+          323,
+          771,
+          552
+        ]
+      },
+      {
+        "file": "illustrations/mascot-layers/nose.png",
+        "bbox": [
+          457,
+          571,
+          565,
+          647
+        ]
+      },
+      {
+        "file": "illustrations/mascot-layers/smile.png",
+        "bbox": [
+          355,
+          650,
+          668,
+          772
+        ]
+      }
+    ]
+  },
+  "illustrations/stellar-logo.png": [
+    512,
+    512
+  ],
+  "illustrations/bitcoin.png": [
+    512,
+    512
+  ],
+  "illustrations/wallet-cards.png": [
+    982,
+    1054
+  ],
+  "wallet-layers": {
+    "canvas": [
+      982,
+      1054
+    ],
+    "layers": [
+      {
+        "file": "illustrations/wallet-layers/base.png",
+        "bbox": [
+          0,
+          201,
+          982,
+          1054
+        ]
+      },
+      {
+        "file": "illustrations/wallet-layers/float-1.png",
+        "bbox": [
+          140,
+          0,
+          278,
+          290
+        ]
+      },
+      {
+        "file": "illustrations/wallet-layers/float-2.png",
+        "bbox": [
+          549,
+          78,
+          646,
+          174
+        ]
+      }
+    ]
+  }
+}
