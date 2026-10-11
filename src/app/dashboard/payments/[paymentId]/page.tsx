@@ -102,7 +102,14 @@ export default function PaymentDetailsPage() {
               {payment.customerWallet ? truncateAddress(payment.customerWallet) : none("Not received yet")}
             </InfoRow>
             <InfoRow label="Transaction hash" copy={payment.transactionHash ?? undefined}>
-              {payment.transactionHash ? truncateHash(payment.transactionHash, 8, 8) : none("Not available yet")}
+              {payment.transactionHash && payment.explorerUrl ? (
+                <a href={payment.explorerUrl} target="_blank" rel="noreferrer" title="View on Stellar explorer" className="text-brand underline underline-offset-4 hover:no-underline">
+                  {truncateHash(payment.transactionHash, 8, 8)}
+                  <span className="sr-only"> (opens the Stellar explorer in a new tab)</span>
+                </a>
+              ) : (
+                none("Not available yet")
+              )}
             </InfoRow>
             <InfoRow label="Checkout link" copy={payment.checkoutUrl}>
               {payment.checkoutUrl}

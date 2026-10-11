@@ -223,10 +223,14 @@ export function Processing({ checkout, controller }: Props) {
 
 // ── 07 ──────────────────────────────────────────────────────────────────────────
 
-function TransactionRow({ hash, label = "Transaction ID" }: { hash: string; label?: string }) {
+/** The transaction ID, linking to the transaction on the Stellar explorer. */
+function TransactionRow({ checkout, hash, label = "Transaction ID" }: { checkout: Checkout; hash: string; label?: string }) {
   return (
     <Row label={label}>
-      <span>{truncateHash(hash)}</span>
+      <a href={explorerLink(checkout, hash)} target="_blank" rel="noreferrer" title="View on Stellar explorer" className="text-brand underline underline-offset-4 hover:no-underline">
+        {truncateHash(hash)}
+        <span className="sr-only"> (opens the Stellar explorer in a new tab)</span>
+      </a>
       <CopyButton value={hash} label="transaction ID" />
     </Row>
   );
@@ -257,7 +261,7 @@ export function Success({ checkout, controller }: Props) {
           </Row>
           <Row label="Asset">{checkout.asset}</Row>
           <Row label="Network">{checkout.network.label}</Row>
-          {transactionHash ? <TransactionRow hash={transactionHash} /> : null}
+          {transactionHash ? <TransactionRow checkout={checkout} hash={transactionHash} /> : null}
           <Row label="Order reference">{checkout.orderId}</Row>
           {paidAt ? <Row label="Date and time">{formatDateTime(paidAt)}</Row> : null}
           <Row label="Payment ID">{checkout.paymentId}</Row>
@@ -383,7 +387,7 @@ export function Pending({ checkout, controller }: Props) {
     >
       {transactionHash ? (
         <Panel>
-          <TransactionRow hash={transactionHash} />
+          <TransactionRow checkout={checkout} hash={transactionHash} />
         </Panel>
       ) : null}
       <Note>You don&apos;t need to pay again. This page will update when it&apos;s confirmed.</Note>
@@ -492,7 +496,7 @@ export function AlreadyPaid({ checkout, controller }: Props) {
     >
       <Panel>
         <Row label="Order ID">{checkout.orderId}</Row>
-        {hash ? <TransactionRow hash={hash} /> : null}
+        {hash ? <TransactionRow checkout={checkout} hash={hash} /> : null}
       </Panel>
     </StatusScreen>
   );
