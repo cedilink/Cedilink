@@ -9,6 +9,7 @@ import { Suspense, useEffect, useRef, useState, type ReactNode } from "react";
 import { api, ApiError } from "@/lib/api/client";
 import { useMerchant, usePayments } from "@/lib/dashboard/queries";
 import { Mascot } from "../motion/mascot";
+import { InstallButton } from "../pwa/install-button";
 import { LiveUpdates } from "./toasts";
 import { Loading } from "./ui";
 
@@ -97,6 +98,7 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
         <p className={group}>Other</p>
         <NavItem icon={<Settings className={icon} />} label="Settings" soon />
         <NavItem icon={<CircleHelp className={icon} />} label="Help & Support" soon />
+        <InstallButton />
       </nav>
 
       <div className="relative">

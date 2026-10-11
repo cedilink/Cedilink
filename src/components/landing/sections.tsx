@@ -293,7 +293,7 @@ export function TestnetBand() {
   );
 }
 
-const FAQS = [
+export const FAQS = [
   { question: "Can I accept real payments today?", answer: "No. The Smartpay MVP runs on Stellar Testnet. All payments in the demo use test assets; no real money is used." },
   { question: "Does my customer need a Credlink account?", answer: "No. Shoppers open the checkout link and connect a Stellar wallet. There is no customer login or account to create." },
   { question: "What does a merchant need to get started?", answer: "Set a receiving wallet and enable Stellar USDC. Then create a payment with a product or service, USDC amount and order reference. Customer name and email are optional." },

@@ -56,6 +56,28 @@ are forwarded, which keeps the merchant session cookie first-party.
 - Create an account at `/signup`, or sign in with the demo merchant seeded by the backend
   (`npm run db:seed` there).
 
+### Installable app (PWA)
+
+- `src/app/manifest.ts` describes the app: it opens on the dashboard, with shortcuts to "Create payment" and "Payments".
+- `public/sw.js` is the service worker, written by hand with no library. Build assets are served from
+  cache, public pages fall back to their last good copy, and anything that cannot load shows
+  `public/offline.html`. It never touches `/api/*` and never stores checkout or dashboard pages.
+  Bump `VERSION` in that file to discard every cache.
+- `src/lib/pwa/store.ts` registers the worker (production builds only) and tracks install, offline and
+  update state. `src/components/pwa/` shows the offline and "new version" notices on every page and the
+  "Install app" entry in the dashboard sidebar. A new version takes over only when the user reloads.
+- Icons, the favicon, the social card and the install-dialog screenshots are drawn from the mascot by
+  `node scripts/generate-brand-assets.mjs`; rerun it when the brand changes.
+
+### Search engines
+
+- `src/lib/site.ts` holds the site address (`NEXT_PUBLIC_SITE_URL`), name and description, and
+  `pageMetadata()` for a public page's title, canonical link and social card.
+- `src/app/robots.ts` and `src/app/sitemap.ts` list the public pages (`/`, `/signup`, `/login`).
+  The dashboard and checkouts are `noindex`, in their metadata and as an `X-Robots-Tag` header (`next.config.ts`).
+- `src/components/seo/json-ld.tsx` adds structured data to the landing page, including the FAQs as shown on the page.
+- Set `NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION` / `NEXT_PUBLIC_BING_SITE_VERIFICATION` to claim the site in each search console.
+
 To pay from a browser, install Freighter, switch it to Testnet, and import the customer secret key
 from the backend's `.env.testnet`.
 
@@ -66,6 +88,7 @@ from the backend's `.env.testnet`.
 | `npm run typecheck`, `npm run lint` | Types and lint |
 | `npm test` | Checkout state machine |
 | `node scripts/landing-browser-check.mjs` | The landing page in Chrome: scrolls through on desktop, mobile and with reduced motion |
+| `node scripts/pwa-browser-check.mjs` | The manifest, the service worker and offline behaviour in Chrome; needs `npm run build && npm start` |
 | `node scripts/checkout-browser-check.mjs` | The checkout in Chrome, end to end against a running backend on Testnet |
 | `node scripts/signup-browser-check.mjs` | Both sign-up routes in Chrome, then a customer paying the new merchant |
 | `node scripts/dashboard-browser-check.mjs` | The dashboard in Chrome, including a live payment arriving; expects a freshly seeded database |
