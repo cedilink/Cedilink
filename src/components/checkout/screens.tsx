@@ -273,7 +273,7 @@ const alert = <Badge tone="alert" />;
 
 /**
  * Testnet only. Offered when the wallet lacks the USDC to pay: one approval adds the asset
- * and swaps some of the wallet's own test XLM for the amount needed.
+ * and swaps the wallet's own test XLM for up to 10,000 test USDC, so later payments need no top-up.
  */
 function TopUp({ checkout, controller }: Props) {
   if (!controller.state.preflight?.topUpAvailable) return null;
@@ -281,8 +281,8 @@ function TopUp({ checkout, controller }: Props) {
   return (
     <>
       <Note>
-        This is {checkout.network.label}, so you can get test {checkout.asset} here: approve one transaction and some of your wallet&apos;s test XLM is
-        swapped for the {checkout.asset} this payment needs.
+        This is {checkout.network.label}, so you can get test {checkout.asset} here: approve one transaction and your wallet&apos;s test XLM is swapped
+        for test {checkout.asset}, enough for this payment and later ones.
       </Note>
       <Button onClick={controller.topUp} disabled={busy || controller.state.connecting}>
         {busy ? (

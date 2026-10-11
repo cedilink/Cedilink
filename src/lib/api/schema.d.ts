@@ -238,7 +238,7 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Testnet only: transaction that gives the wallet the USDC this payment needs
+         * Testnet only: transaction that gives the wallet test USDC, enough for this payment and later ones
          * @description Error codes: TOP_UP_UNAVAILABLE, TOP_UP_NOT_NEEDED, TOP_UP_FAILED, INSUFFICIENT_XLM, INVALID_WALLET.
          */
         post: operations["createCheckoutTopUp"];

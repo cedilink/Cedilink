@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
-/** Public address of this app. Canonical links, the sitemap and social cards are built from it. */
-export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://credlink.cc").replace(/\/$/, "");
+/** Public address of this app. Canonical links, the sitemap and social cards are built from it. The bare domain redirects to www, so www is the canonical host. */
+export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.credlink.cc").replace(/\/$/, "");
 
 export const SITE_NAME = "Credlink Smartpay";
 export const SITE_TITLE = "Credlink Smartpay — Accept USDC on Stellar";
