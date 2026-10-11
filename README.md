@@ -75,6 +75,9 @@ are forwarded, which keeps the merchant session cookie first-party.
   `pageMetadata()` for a public page's title, canonical link and social card.
 - `src/app/robots.ts` and `src/app/sitemap.ts` list the public pages (`/`, `/signup`, `/login`).
   The dashboard and checkouts are `noindex`, in their metadata and as an `X-Robots-Tag` header (`next.config.ts`).
+- A checkout link describes its own payment: `src/app/c/[paymentId]/page.tsx` sets the title and
+  description (merchant, amount, product, order), and `opengraph-image.tsx` beside it draws the
+  preview picture shown when the link is shared. The fonts it uses are in `src/assets/fonts/`.
 - `src/components/seo/json-ld.tsx` adds structured data to the landing page, including the FAQs as shown on the page.
 - Set `NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION` / `NEXT_PUBLIC_BING_SITE_VERIFICATION` to claim the site in each search console.
 
