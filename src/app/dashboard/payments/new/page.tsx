@@ -140,7 +140,7 @@ export default function CreatePaymentPage() {
           ) : null}
           <Card className="flex flex-col gap-5 p-5">
             <Field label="Product or service" error={fields.productName}>
-              <input className={inputClass} name="productName" placeholder="Ghana Web3 Conference Ticket" maxLength={140} required aria-invalid={Boolean(fields.productName)} />
+              <input className={inputClass} name="productName" placeholder="e.g. Conference ticket" maxLength={140} required aria-invalid={Boolean(fields.productName)} />
             </Field>
             <div className="grid grid-cols-2 gap-3">
               <Field label="Amount" error={fields.amount}>
