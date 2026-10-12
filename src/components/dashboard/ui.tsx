@@ -34,18 +34,51 @@ export function PillLink({ variant = "brand", className = "", ...props }: { vari
   return <Link className={`${pill} ${pillVariants[variant]} ${className}`} {...props} />;
 }
 
-export function Field({ label, error, hint, children }: { label: string; error?: string; hint?: string; children: ReactNode }) {
+/**
+ * A labelled form control. By default the whole field is the label, which suits a single input.
+ * Pass `htmlFor` when the field holds more than the input (a show/hide button, say), so only
+ * the label text names it.
+ */
+export function Field({ label, error, hint, htmlFor, children }: { label: string; error?: string; hint?: string; htmlFor?: string; children: ReactNode }) {
+  const note = error ? <span className="mt-1.5 block text-xs text-failed">{error}</span> : hint ? <span className="mt-1.5 block text-xs text-muted">{hint}</span> : null;
+  if (htmlFor) {
+    return (
+      <div>
+        <label htmlFor={htmlFor} className="mb-1.5 block text-xs text-muted">
+          {label}
+        </label>
+        {children}
+        {note}
+      </div>
+    );
+  }
   return (
     <label className="block">
       <span className="mb-1.5 block text-xs text-muted">{label}</span>
       {children}
-      {error ? <span className="mt-1.5 block text-xs text-failed">{error}</span> : hint ? <span className="mt-1.5 block text-xs text-muted">{hint}</span> : null}
+      {note}
     </label>
   );
 }
 
 export const inputClass =
   "h-11 w-full rounded-full border border-line bg-white px-4 text-sm text-ink outline-none transition-colors placeholder:text-subtle focus:border-brand read-only:bg-surface read-only:text-muted aria-[invalid=true]:border-failed";
+
+export function Toggle({ checked, onChange, label, disabled }: { checked: boolean; onChange: (next: boolean) => void; label: string; disabled?: boolean }) {
+  return (
+    <button
+      type="button"
+      role="switch"
+      aria-checked={checked}
+      aria-label={label}
+      disabled={disabled}
+      onClick={() => onChange(!checked)}
+      className={`relative h-6 w-11 shrink-0 rounded-full transition-colors disabled:opacity-50 ${checked ? "bg-brand" : "bg-line"}`}
+    >
+      <span className={`absolute top-1 size-4 rounded-full bg-white transition-[left] ${checked ? "left-6" : "left-1"}`} />
+    </button>
+  );
+}
 
 export function Loading({ label = "Loading" }: { label?: string }) {
   return (

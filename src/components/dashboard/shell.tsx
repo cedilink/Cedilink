@@ -18,6 +18,7 @@ const TITLES: [prefix: string, title: string][] = [
   ["/dashboard/payments/", "Payment details"],
   ["/dashboard/payments", "Payments"],
   ["/dashboard/payment-methods/stellar-usdc", "Stellar USDC"],
+  ["/dashboard/settings", "Settings"],
   ["/dashboard", "Overview"],
 ];
 
@@ -96,7 +97,7 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
         <NavItem icon={<Wallet className={icon} />} label="All methods" soon />
         <NavItem href="/dashboard/payment-methods/stellar-usdc" icon={<Wallet className={icon} />} label="Stellar USDC" active={pathname.startsWith("/dashboard/payment-methods/stellar-usdc")} />
         <p className={group}>Other</p>
-        <NavItem icon={<Settings className={icon} />} label="Settings" soon />
+        <NavItem href="/dashboard/settings" icon={<Settings className={icon} />} label="Settings" active={pathname.startsWith("/dashboard/settings")} />
         <NavItem icon={<CircleHelp className={icon} />} label="Help & Support" soon />
         <InstallButton />
       </nav>
@@ -111,6 +112,9 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
               exit={{ opacity: 0, y: 6 }}
               transition={{ duration: 0.15 }}
             >
+              <Link href="/dashboard/settings" onClick={() => setMenuOpen(false)} className="flex h-10 w-full items-center gap-2.5 rounded-xl px-3 text-sm text-ink hover:bg-surface">
+                <Settings className="size-4" /> Account settings
+              </Link>
               <button
                 type="button"
                 className="flex h-10 w-full items-center gap-2.5 rounded-xl px-3 text-sm text-ink hover:bg-surface"
@@ -129,7 +133,7 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
           <Mascot size={36} />
           <span className="min-w-0 flex-1">
             <span className="block truncate text-sm text-ink">{merchant?.name ?? " "}</span>
-            <span className="block text-xs text-muted">Merchant</span>
+            <span className="block truncate text-xs text-muted">{merchant?.businessName ?? "Merchant"}</span>
           </span>
           <ChevronsUpDown className="size-3.5 text-muted" />
         </button>

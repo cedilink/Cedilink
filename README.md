@@ -33,6 +33,7 @@ Getting paid in digital dollars usually means sharing a wallet address, waiting 
 | Test funds | "Get test USDC" on the checkout tops up a Testnet wallet so anyone can try a payment |
 | Merchant sign-up | A managed wallet created for the merchant, or an existing one (Freighter, Albedo or a pasted public key) |
 | Dashboard | Overview, payments list and details, create payment, Stellar USDC settings, and a toast when a payment turns paid |
+| Account settings | Business name and the merchant's name, sign-in email, password, which emails are sent, a summary of the payment method, and signing out other devices |
 | Installable app | Works as a PWA: opens on the dashboard, with offline and "new version" notices |
 | Sharing and search | Each checkout link carries its own title, description and preview image; public pages have a sitemap and structured data |
 
@@ -94,7 +95,7 @@ The browser never calls the backend directly. Requests go to `/api/*` on this ap
 |---|---|
 | `src/app/` | Routes, metadata, the manifest, `robots.ts` and `sitemap.ts` |
 | `src/components/checkout/` | The checkout screens |
-| `src/components/dashboard/` | Dashboard shell, shared UI and the live-update toasts |
+| `src/components/dashboard/` | Dashboard shell, shared UI, the live-update toasts and the settings page (`settings.tsx`) |
 | `src/components/landing/` | Landing sections, the pinned checkout scene and the animation layer |
 | `src/lib/checkout/` | The checkout state machine, its wallet and API wiring, and SEP-7 links |
 | `src/lib/wallets/` | One adapter per wallet behind a shared interface |
@@ -105,6 +106,7 @@ The browser never calls the backend directly. Requests go to `/api/*` on this ap
 Notes for contributors:
 
 - **Checkout.** `src/lib/checkout/machine.ts` has one state per designed screen. The success screen is reachable only when the backend reports the payment as paid.
+- **Settings.** `/dashboard/settings` is the merchant's own settings. Each section saves on its own.
 - **Landing page.** Sections are plain markup that opt in to animation with data attributes (`data-split`, `data-fade`, `data-clip`, …). `landing-motion.tsx` owns the scroll-driven animation and documents each attribute. Nothing is animated for visitors who prefer reduced motion.
 - **Service worker.** `public/sw.js` is written by hand. It never touches `/api/*` and never stores checkout or dashboard pages. Bump `VERSION` in that file to discard every cache.
 - **Search engines.** The dashboard and checkouts are `noindex`, both in their metadata and as an `X-Robots-Tag` header set in `next.config.ts`.

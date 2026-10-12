@@ -2,24 +2,9 @@
 
 import { Check, Wallet } from "lucide-react";
 import { useState } from "react";
-import { Card, Field, inputClass, LoadError, Loading, PageHeader, PillButton } from "@/components/dashboard/ui";
+import { Card, Field, inputClass, LoadError, Loading, PageHeader, PillButton, Toggle } from "@/components/dashboard/ui";
 import { ApiError, type StellarSettings } from "@/lib/api/client";
 import { useSaveStellarSettings, useStellarSettings } from "@/lib/dashboard/queries";
-
-function Toggle({ checked, onChange, label }: { checked: boolean; onChange: (next: boolean) => void; label: string }) {
-  return (
-    <button
-      type="button"
-      role="switch"
-      aria-checked={checked}
-      aria-label={label}
-      onClick={() => onChange(!checked)}
-      className={`relative h-6 w-11 shrink-0 rounded-full transition-colors ${checked ? "bg-brand" : "bg-line"}`}
-    >
-      <span className={`absolute top-1 size-4 rounded-full bg-white transition-[left] ${checked ? "left-6" : "left-1"}`} />
-    </button>
-  );
-}
 
 function SettingsForm({ settings }: { settings: StellarSettings }) {
   const save = useSaveStellarSettings();

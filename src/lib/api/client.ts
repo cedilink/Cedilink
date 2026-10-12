@@ -10,6 +10,8 @@ export type Preflight = Schemas["Preflight"];
 export type CheckoutStatus = Schemas["CheckoutStatus"];
 export type StellarSettings = Schemas["StellarSettings"];
 export type Merchant = Schemas["Merchant"];
+export type Account = Schemas["Account"];
+export type Notifications = Schemas["Notifications"];
 
 /** An error answered by the API, carrying its machine-readable code. */
 export class ApiError extends Error {

@@ -1,10 +1,11 @@
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { api, type Merchant, type Overview, type Payment, type PaymentList, type StellarSettings } from "@/lib/api/client";
+import { api, type Account, type Merchant, type Notifications, type Overview, type Payment, type PaymentList, type StellarSettings } from "@/lib/api/client";
 
 export const keys = {
   me: ["me"] as const,
+  account: ["account"] as const,
   overview: ["overview"] as const,
   settings: ["settings"] as const,
   payments: (status: string, q: string) => ["payments", status, q] as const,
@@ -63,3 +64,26 @@ export function useCreatePayment() {
     },
   });
 }
+
+export const useAccount = () => useQuery({ queryKey: keys.account, queryFn: () => api<Account>("/account") });
+
+/**
+ * One mutation per settings section. Each answers with the whole account, which replaces
+ * what is cached; the sidebar reads the merchant from its own query, so that is updated too.
+ */
+function useAccountMutation<Body>(method: "PUT" | "POST", path: string) {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: (body: Body) => api<Account>(path, { method, body: body ?? undefined }),
+    onSuccess: (account) => {
+      client.setQueryData(keys.account, account);
+      client.setQueryData(keys.me, account.merchant);
+    },
+  });
+}
+
+export const useSaveProfile = () => useAccountMutation<{ name: string; businessName: string }>("PUT", "/account/profile");
+export const useChangeEmail = () => useAccountMutation<{ email: string; currentPassword: string }>("PUT", "/account/email");
+export const useChangePassword = () => useAccountMutation<{ currentPassword: string; newPassword: string }>("PUT", "/account/password");
+export const useSaveNotifications = () => useAccountMutation<Notifications>("PUT", "/account/notifications");
+export const useRevokeOtherSessions = () => useAccountMutation<void>("POST", "/account/sessions/revoke-others");
