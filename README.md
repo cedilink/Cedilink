@@ -1,28 +1,28 @@
-# Credlink Smartpay
+# Cedilink Smartpay
 
 **Accept USDC on Stellar with one link.**
 
-Credlink Smartpay lets Ghanaian merchants request a payment in USDC, share a checkout link, and see the payment confirmed only after it has been verified on the Stellar network.
+Cedilink Smartpay lets Ghanaian merchants request a payment in USDC, share a checkout link, and see the payment confirmed only after it has been verified on the Stellar network.
 
-Live at [www.credlink.cc](https://www.credlink.cc). The MVP runs on **Stellar Testnet**: every payment uses test assets and no real money moves.
+Live at [www.cedilink.com](https://www.cedilink.com). The MVP runs on **Stellar Testnet**: every payment uses test assets and no real money moves.
 
-![The Credlink Smartpay landing page](public/screenshots/landing-wide.png)
+![The Cedilink Smartpay landing page](public/screenshots/landing-wide.png)
 
-## What is Credlink?
+## What is Cedilink?
 
-Getting paid in digital dollars usually means sharing a wallet address, waiting for a screenshot, and checking a block explorer by hand. Credlink replaces that with a payment request the merchant creates in seconds and a checkout the customer can trust.
+Getting paid in digital dollars usually means sharing a wallet address, waiting for a screenshot, and checking a block explorer by hand. Cedilink replaces that with a payment request the merchant creates in seconds and a checkout the customer can trust.
 
 - **For merchants:** a dashboard to create payments, share checkout links and follow each payment's status live.
-- **For customers:** a clear checkout that needs no Credlink account. Open the link, connect a Stellar wallet, approve the payment.
+- **For customers:** a clear checkout that needs no Cedilink account. Open the link, connect a Stellar wallet, approve the payment.
 - **For both:** a payment is marked paid only when the transaction has been found and checked on Stellar, and every payment links to the Stellar explorer.
 
 ## How it works
 
-1. **Set up.** The merchant signs up and sets a receiving wallet. Credlink can create one, or the merchant connects a wallet they already have.
+1. **Set up.** The merchant signs up and sets a receiving wallet. Cedilink can create one, or the merchant connects a wallet they already have.
 2. **Create a payment.** The merchant enters a product or service, a USDC amount and an order reference. Customer name and email are optional.
-3. **Share the link.** Credlink generates a checkout link. The order details travel with it, including the preview shown when the link is shared.
+3. **Share the link.** Cedilink generates a checkout link. The order details travel with it, including the preview shown when the link is shared.
 4. **The customer pays.** They review the checkout, connect a Stellar wallet and approve the payment in the wallet. On a phone they can pay from a wallet app instead.
-5. **Credlink verifies.** The backend finds the transaction on Stellar and checks it against the payment. Only then do the checkout and the dashboard show it as paid.
+5. **Cedilink verifies.** The backend finds the transaction on Stellar and checks it against the payment. Only then do the checkout and the dashboard show it as paid.
 
 ## Features
 
@@ -56,7 +56,7 @@ This repository is the web app. The API and the background workers that verify p
 
 ## Getting started
 
-You need Node.js 24 and a running Credlink backend.
+You need Node.js 24 and a running Cedilink backend.
 
 ```bash
 npm install
@@ -142,4 +142,4 @@ npm run api:types
 
 ## Status
 
-Credlink Smartpay is an MVP on Stellar Testnet, built for Ghanaian merchants. It does not process real payments yet.
+Cedilink Smartpay is an MVP on Stellar Testnet, built for Ghanaian merchants. It does not process real payments yet.

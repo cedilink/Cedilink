@@ -22,15 +22,34 @@ const FREIGHTER_URL = "https://www.freighter.app/";
 /** "25.00" -> "$25", "25.50" -> "$25.50": the short form used on the pay button. */
 const shortUsd = (amount: string) => `$${amount.replace(/\.00$/, "")}`;
 
-function ExternalLink({ href, variant, children }: { href: string; variant: "ink" | "outline"; children: string }) {
+function ExternalLink({
+  href,
+  variant,
+  children,
+}: {
+  href: string;
+  variant: "ink" | "outline";
+  children: string;
+}) {
   return (
-    <a href={href} target="_blank" rel="noreferrer" className={buttonClass({ variant })}>
+    <a
+      href={href}
+      target="_blank"
+      rel="noreferrer"
+      className={buttonClass({ variant })}
+    >
       {children}
     </a>
   );
 }
 
-function ReturnToMerchant({ checkout, variant }: { checkout: Checkout; variant: "ink" | "outline" }) {
+function ReturnToMerchant({
+  checkout,
+  variant,
+}: {
+  checkout: Checkout;
+  variant: "ink" | "outline";
+}) {
   if (!checkout.returnUrl) return null;
   return (
     <a href={checkout.returnUrl} className={buttonClass({ variant })}>
@@ -42,17 +61,35 @@ function ReturnToMerchant({ checkout, variant }: { checkout: Checkout; variant: 
 // ── 01 ──────────────────────────────────────────────────────────────────────────
 
 const METHOD_ART = {
-  card: { src: walletCards, text: "Pay with a debit or credit card", className: "object-contain" },
-  crypto: { src: bitcoin, text: "Pay with other supported crypto networks", className: "" },
-  stellar_usdc: { src: stellarLogo, text: "Pay securely with USDC on Stellar.", className: "" },
+  card: {
+    src: walletCards,
+    text: "Pay with a debit or credit card",
+    className: "object-contain",
+  },
+  crypto: {
+    src: bitcoin,
+    text: "Pay with other supported crypto networks",
+    className: "",
+  },
+  stellar_usdc: {
+    src: stellarLogo,
+    text: "Pay securely with USDC on Stellar.",
+    className: "",
+  },
 } as const;
 
 export function SelectMethod({ checkout, controller }: Props) {
   return (
     <div className="flex flex-col gap-3">
-      <div role="radiogroup" aria-label="Payment method" className="flex flex-col gap-2">
+      <div
+        role="radiogroup"
+        aria-label="Payment method"
+        className="flex flex-col gap-2"
+      >
         {checkout.methods.map((method) => {
-          const art = METHOD_ART[method.id as keyof typeof METHOD_ART] ?? METHOD_ART.stellar_usdc;
+          const art =
+            METHOD_ART[method.id as keyof typeof METHOD_ART] ??
+            METHOD_ART.stellar_usdc;
           return (
             <div
               key={method.id}
@@ -61,13 +98,25 @@ export function SelectMethod({ checkout, controller }: Props) {
               aria-disabled={!method.available}
               className={`flex items-center gap-3 rounded-2xl bg-white p-3 ${method.available ? "" : "opacity-55"}`}
             >
-              <Image src={art.src} alt="" width={36} height={36} className={`size-9 shrink-0 rounded-lg ${art.className}`} />
+              <Image
+                src={art.src}
+                alt=""
+                width={36}
+                height={36}
+                className={`size-9 shrink-0 rounded-lg ${art.className}`}
+              />
               <div className="min-w-0 flex-1">
                 <p className="text-sm text-ink">{method.label}</p>
-                <p className="text-xs text-muted">{method.available ? art.text : "Not available in this demo"}</p>
+                <p className="text-xs text-muted">
+                  {method.available ? art.text : "Not available in this demo"}
+                </p>
               </div>
-              <span className={`grid size-4 place-items-center rounded-full border ${method.available ? "border-ink" : "border-subtle"}`}>
-                {method.available ? <span className="size-2 rounded-full bg-ink" /> : null}
+              <span
+                className={`grid size-4 place-items-center rounded-full border ${method.available ? "border-ink" : "border-subtle"}`}
+              >
+                {method.available ? (
+                  <span className="size-2 rounded-full bg-ink" />
+                ) : null}
               </span>
             </div>
           );
@@ -110,7 +159,11 @@ export function Review({ checkout, controller }: Props) {
             <span>{truncateAddress(wallet.address)}</span>
             <CopyButton value={wallet.address} label="wallet address" />
           </Row>
-          <button type="button" onClick={controller.disconnect} className="mt-2 text-sm text-ink underline-offset-4 hover:underline">
+          <button
+            type="button"
+            onClick={controller.disconnect}
+            className="mt-2 text-sm text-ink underline-offset-4 hover:underline"
+          >
             Disconnect
           </button>
         </div>
@@ -125,10 +178,16 @@ export function Review({ checkout, controller }: Props) {
           <Row label="Recipient">{checkout.merchant.name}</Row>
           <p className="mt-1.5 flex items-center gap-2.5 text-sm text-ink">
             <span>{truncateAddress(checkout.recipientAddress)}</span>
-            <CopyButton value={checkout.recipientAddress} label="recipient address" />
+            <CopyButton
+              value={checkout.recipientAddress}
+              label="recipient address"
+            />
           </p>
         </div>
-        <Row label="Network fee" note="A small fee paid to the Stellar network.">
+        <Row
+          label="Network fee"
+          note="A small fee paid to the Stellar network."
+        >
           About {Number(preflight.estimatedFee)} {preflight.feeAsset}
         </Row>
       </Panel>
@@ -167,7 +226,11 @@ export function AwaitingApproval({ checkout, controller }: Props) {
     >
       <PaymentLine checkout={checkout} />
       <div className="flex items-center justify-center gap-2 py-1" aria-hidden>
-        <motion.span className="size-1.5 rounded-full bg-ink" animate={{ scale: [1, 1.5, 1] }} transition={{ duration: 1.2, repeat: Infinity }} />
+        <motion.span
+          className="size-1.5 rounded-full bg-ink"
+          animate={{ scale: [1, 1.5, 1] }}
+          transition={{ duration: 1.2, repeat: Infinity }}
+        />
         <span className="h-px w-8 bg-line" />
         <span className="size-1.5 rounded-full bg-line" />
         <span className="h-px w-8 bg-line" />
@@ -179,7 +242,13 @@ export function AwaitingApproval({ checkout, controller }: Props) {
 
 // ── 06 ──────────────────────────────────────────────────────────────────────────
 
-function Step({ label, state }: { label: string; state: "done" | "active" | "waiting" }) {
+function Step({
+  label,
+  state,
+}: {
+  label: string;
+  state: "done" | "active" | "waiting";
+}) {
   return (
     <li className="flex items-center gap-3">
       <span
@@ -188,7 +257,11 @@ function Step({ label, state }: { label: string; state: "done" | "active" | "wai
         }`}
       >
         {state === "done" ? (
-          <motion.span initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring", stiffness: 400, damping: 18 }}>
+          <motion.span
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ type: "spring", stiffness: 400, damping: 18 }}
+          >
             <Check className="size-3.5" strokeWidth={2.5} />
           </motion.span>
         ) : state === "active" ? (
@@ -196,8 +269,18 @@ function Step({ label, state }: { label: string; state: "done" | "active" | "wai
         ) : null}
       </span>
       <span>
-        <span className={`block text-sm ${state === "waiting" ? "text-muted" : "text-ink"}`}>{label}</span>
-        <span className="block text-xs text-muted">{state === "done" ? "Done" : state === "active" ? "In progress" : "Waiting"}</span>
+        <span
+          className={`block text-sm ${state === "waiting" ? "text-muted" : "text-ink"}`}
+        >
+          {label}
+        </span>
+        <span className="block text-xs text-muted">
+          {state === "done"
+            ? "Done"
+            : state === "active"
+              ? "In progress"
+              : "Waiting"}
+        </span>
       </span>
     </li>
   );
@@ -206,17 +289,37 @@ function Step({ label, state }: { label: string; state: "done" | "active" | "wai
 export function Processing({ checkout, controller }: Props) {
   const { status } = controller.state;
   // Each step reflects a backend status, not a timer.
-  const submitted = status === "TRANSACTION_SUBMITTED" || status === "CONFIRMING" || status === "PAID";
+  const submitted =
+    status === "TRANSACTION_SUBMITTED" ||
+    status === "CONFIRMING" ||
+    status === "PAID";
   const confirming = status === "CONFIRMING" || status === "PAID";
   return (
     <StatusScreen icon={<SpinnerIcon />} title="Processing payment…">
       <PaymentLine checkout={checkout} />
-      <ol className="flex flex-col gap-4 rounded-2xl bg-surface p-4" aria-live="polite">
+      <ol
+        className="flex flex-col gap-4 rounded-2xl bg-surface p-4"
+        aria-live="polite"
+      >
         <Step label="Payment initiated" state="done" />
-        <Step label="Transaction submitted" state={submitted ? "done" : "active"} />
-        <Step label="Confirming on Stellar" state={status === "PAID" ? "done" : confirming || submitted ? "active" : "waiting"} />
+        <Step
+          label="Transaction submitted"
+          state={submitted ? "done" : "active"}
+        />
+        <Step
+          label="Confirming on Stellar"
+          state={
+            status === "PAID"
+              ? "done"
+              : confirming || submitted
+                ? "active"
+                : "waiting"
+          }
+        />
       </ol>
-      <p className="text-center text-sm text-muted">Please keep this page open.</p>
+      <p className="text-center text-sm text-muted">
+        Please keep this page open.
+      </p>
     </StatusScreen>
   );
 }
@@ -224,12 +327,29 @@ export function Processing({ checkout, controller }: Props) {
 // ── 07 ──────────────────────────────────────────────────────────────────────────
 
 /** The transaction ID, linking to the transaction on the Stellar explorer. */
-function TransactionRow({ checkout, hash, label = "Transaction ID" }: { checkout: Checkout; hash: string; label?: string }) {
+function TransactionRow({
+  checkout,
+  hash,
+  label = "Transaction ID",
+}: {
+  checkout: Checkout;
+  hash: string;
+  label?: string;
+}) {
   return (
     <Row label={label}>
-      <a href={explorerLink(checkout, hash)} target="_blank" rel="noreferrer" title="View on Stellar explorer" className="text-brand underline underline-offset-4 hover:no-underline">
+      <a
+        href={explorerLink(checkout, hash)}
+        target="_blank"
+        rel="noreferrer"
+        title="View on Stellar explorer"
+        className="text-brand underline underline-offset-4 hover:no-underline"
+      >
         {truncateHash(hash)}
-        <span className="sr-only"> (opens the Stellar explorer in a new tab)</span>
+        <span className="sr-only">
+          {" "}
+          (opens the Stellar explorer in a new tab)
+        </span>
       </a>
       <CopyButton value={hash} label="transaction ID" />
     </Row>
@@ -246,7 +366,10 @@ export function Success({ checkout, controller }: Props) {
       actions={
         <>
           {transactionHash ? (
-            <ExternalLink href={explorerLink(checkout, transactionHash)} variant="ink">
+            <ExternalLink
+              href={explorerLink(checkout, transactionHash)}
+              variant="ink"
+            >
               View Transaction
             </ExternalLink>
           ) : null}
@@ -254,16 +377,24 @@ export function Success({ checkout, controller }: Props) {
         </>
       }
     >
-      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}>
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.5, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+      >
         <Panel>
           <Row label="Amount paid">
             {checkout.amount} {checkout.asset}
           </Row>
           <Row label="Asset">{checkout.asset}</Row>
           <Row label="Network">{checkout.network.label}</Row>
-          {transactionHash ? <TransactionRow checkout={checkout} hash={transactionHash} /> : null}
+          {transactionHash ? (
+            <TransactionRow checkout={checkout} hash={transactionHash} />
+          ) : null}
           <Row label="Order reference">{checkout.orderId}</Row>
-          {paidAt ? <Row label="Date and time">{formatDateTime(paidAt)}</Row> : null}
+          {paidAt ? (
+            <Row label="Date and time">{formatDateTime(paidAt)}</Row>
+          ) : null}
           <Row label="Payment ID">{checkout.paymentId}</Row>
         </Panel>
       </motion.div>
@@ -285,10 +416,14 @@ function TopUp({ checkout, controller }: Props) {
   return (
     <>
       <Note>
-        This is {checkout.network.label}, so you can get test {checkout.asset} here: approve one transaction and your wallet&apos;s test XLM is swapped
+        This is {checkout.network.label}, so you can get test {checkout.asset}{" "}
+        here: approve one transaction and your wallet&apos;s test XLM is swapped
         for test {checkout.asset}, enough for this payment and later ones.
       </Note>
-      <Button onClick={controller.topUp} disabled={busy || controller.state.connecting}>
+      <Button
+        onClick={controller.topUp}
+        disabled={busy || controller.state.connecting}
+      >
         {busy ? (
           <>
             <Spinner className="size-4" /> Getting test {checkout.asset}…
@@ -302,7 +437,8 @@ function TopUp({ checkout, controller }: Props) {
 }
 
 /** "Try again" is the main action unless a top-up is on offer, in which case it steps back. */
-const retryVariant = (controller: CheckoutController) => (controller.state.preflight?.topUpAvailable ? "outline" : "ink");
+const retryVariant = (controller: CheckoutController) =>
+  controller.state.preflight?.topUpAvailable ? "outline" : "ink";
 
 const OtherMethod = ({ controller }: Pick<Props, "controller">) => (
   <Button variant="outline" onClick={controller.disconnect}>
@@ -320,7 +456,11 @@ export function InsufficientUsdc({ checkout, controller }: Props) {
       actions={
         <>
           <TopUp checkout={checkout} controller={controller} />
-          <Button variant={retryVariant(controller)} onClick={controller.retry} disabled={controller.state.connecting || controller.state.toppingUp}>
+          <Button
+            variant={retryVariant(controller)}
+            onClick={controller.retry}
+            disabled={controller.state.connecting || controller.state.toppingUp}
+          >
             Try again
           </Button>
           <OtherMethod controller={controller} />
@@ -345,7 +485,12 @@ export function InsufficientXlm({ controller }: Props) {
       message="You need a small amount of XLM to cover the Stellar transaction fee."
       actions={
         <>
-          <Button onClick={controller.retry} disabled={controller.state.connecting}>Try again</Button>
+          <Button
+            onClick={controller.retry}
+            disabled={controller.state.connecting}
+          >
+            Try again
+          </Button>
           <OtherMethod controller={controller} />
         </>
       }
@@ -363,7 +508,12 @@ export function Failed({ checkout, controller }: Props) {
       message="Your payment could not be completed. Please try again."
       actions={
         <>
-          <Button onClick={controller.retry} disabled={controller.state.connecting}>Try again</Button>
+          <Button
+            onClick={controller.retry}
+            disabled={controller.state.connecting}
+          >
+            Try again
+          </Button>
           <ReturnToMerchant checkout={checkout} variant="outline" />
         </>
       }
@@ -390,7 +540,10 @@ export function Pending({ checkout, controller }: Props) {
           <TransactionRow checkout={checkout} hash={transactionHash} />
         </Panel>
       ) : null}
-      <Note>You don&apos;t need to pay again. This page will update when it&apos;s confirmed.</Note>
+      <Note>
+        You don&apos;t need to pay again. This page will update when it&apos;s
+        confirmed.
+      </Note>
     </StatusScreen>
   );
 }
@@ -411,7 +564,12 @@ export function WrongNetwork({ checkout, controller }: Props) {
   );
   if (code === "ACCOUNT_NOT_FOUND") {
     message = `This account doesn't exist on ${network.label} yet.`;
-    help = controller.state.preflight?.topUpAvailable ? null : <Note>Fund the account with XLM on {network.label}, add {asset} to it, then try again.</Note>;
+    help = controller.state.preflight?.topUpAvailable ? null : (
+      <Note>
+        Fund the account with XLM on {network.label}, add {asset} to it, then
+        try again.
+      </Note>
+    );
   } else if (code === "NO_USDC_TRUSTLINE") {
     // A wallet often "has USDC" that is a different token with the same name.
     const lookalike = controller.state.preflight?.lookalike;
@@ -422,22 +580,28 @@ export function WrongNetwork({ checkout, controller }: Props) {
       <>
         {lookalike ? (
           <Note icon={false}>
-            Yours is issued by {truncateAddress(lookalike.issuer, 6, 6)}. On Stellar, tokens with the same name from different issuers are different
-            assets.
+            Yours is issued by {truncateAddress(lookalike.issuer, 6, 6)}. On
+            Stellar, tokens with the same name from different issuers are
+            different assets.
           </Note>
         ) : null}
         {assetIssuer ? (
           <Panel>
             <Row label="Asset code">{asset}</Row>
             <Row label="Issuer">
-              <span className="min-w-0 truncate">{truncateAddress(assetIssuer, 6, 6)}</span>
+              <span className="min-w-0 truncate">
+                {truncateAddress(assetIssuer, 6, 6)}
+              </span>
               <CopyButton value={assetIssuer} label="issuer" />
             </Row>
           </Panel>
         ) : null}
         {/* With a top-up on offer the button does this for them, so the manual steps would only add noise. */}
         {controller.state.preflight?.topUpAvailable ? null : (
-          <Note>In your wallet, add an asset with this code and issuer, make sure it holds enough {asset}, then try again.</Note>
+          <Note>
+            In your wallet, add an asset with this code and issuer, make sure it
+            holds enough {asset}, then try again.
+          </Note>
         )}
       </>
     );
@@ -451,7 +615,11 @@ export function WrongNetwork({ checkout, controller }: Props) {
       actions={
         <>
           <TopUp checkout={checkout} controller={controller} />
-          <Button variant={retryVariant(controller)} onClick={controller.retry} disabled={controller.state.connecting || controller.state.toppingUp}>
+          <Button
+            variant={retryVariant(controller)}
+            onClick={controller.retry}
+            disabled={controller.state.connecting || controller.state.toppingUp}
+          >
             Try again
           </Button>
           <OtherMethod controller={controller} />
@@ -510,8 +678,15 @@ export function WalletDisconnected({ controller }: Props) {
       message="Your wallet was disconnected. Reconnect to continue."
       actions={
         <>
-          <Button onClick={controller.retry} disabled={controller.state.connecting}>Reconnect wallet</Button>
-          <Button variant="outline" onClick={controller.disconnect}>Cancel</Button>
+          <Button
+            onClick={controller.retry}
+            disabled={controller.state.connecting}
+          >
+            Reconnect wallet
+          </Button>
+          <Button variant="outline" onClick={controller.disconnect}>
+            Cancel
+          </Button>
         </>
       }
     />
@@ -526,8 +701,15 @@ export function ConnectionRejected({ controller }: Props) {
       message="You declined the connection request in your wallet."
       actions={
         <>
-          <Button onClick={controller.retry} disabled={controller.state.connecting}>Try again</Button>
-          <Button variant="outline" onClick={controller.openWallets}>Choose another wallet</Button>
+          <Button
+            onClick={controller.retry}
+            disabled={controller.state.connecting}
+          >
+            Try again
+          </Button>
+          <Button variant="outline" onClick={controller.openWallets}>
+            Choose another wallet
+          </Button>
         </>
       }
     />
@@ -545,7 +727,9 @@ export function WalletNotInstalled({ controller }: Props) {
           <ExternalLink href={FREIGHTER_URL} variant="ink">
             Install Freighter
           </ExternalLink>
-          <Button variant="outline" onClick={controller.openWallets}>Choose another wallet</Button>
+          <Button variant="outline" onClick={controller.openWallets}>
+            Choose another wallet
+          </Button>
         </>
       }
     />
@@ -554,7 +738,7 @@ export function WalletNotInstalled({ controller }: Props) {
 
 /**
  * Paying from a wallet app instead of a browser extension, which is the route for phones.
- * The customer sends the payment themselves; Credlink recognises it by the memo and this
+ * The customer sends the payment themselves; Cedilink recognises it by the memo and this
  * page moves to success when it has been verified.
  */
 export function WalletApp({ checkout, controller }: Props) {
@@ -571,7 +755,10 @@ export function WalletApp({ checkout, controller }: Props) {
       message="Send this exact payment from any Stellar wallet. This page updates when it arrives."
       actions={
         <>
-          <a href={walletAppLink(checkout)} className={buttonClass({ variant: "ink" })}>
+          <a
+            href={walletAppLink(checkout)}
+            className={buttonClass({ variant: "ink" })}
+          >
             Open wallet app
           </a>
           <Button variant="outline" onClick={controller.openWallets}>
@@ -581,14 +768,32 @@ export function WalletApp({ checkout, controller }: Props) {
       }
     >
       <Panel>
-        {copyRow("Amount", `${checkout.amount} ${checkout.asset}`, checkout.amount)}
-        {copyRow("Send to", truncateAddress(checkout.recipientAddress, 6, 6), checkout.recipientAddress)}
+        {copyRow(
+          "Amount",
+          `${checkout.amount} ${checkout.asset}`,
+          checkout.amount,
+        )}
+        {copyRow(
+          "Send to",
+          truncateAddress(checkout.recipientAddress, 6, 6),
+          checkout.recipientAddress,
+        )}
         {copyRow("Memo (text)", checkout.paymentId, checkout.paymentId)}
-        {copyRow(`${checkout.asset} issuer`, truncateAddress(checkout.assetIssuer, 6, 6), checkout.assetIssuer)}
+        {copyRow(
+          `${checkout.asset} issuer`,
+          truncateAddress(checkout.assetIssuer, 6, 6),
+          checkout.assetIssuer,
+        )}
         <Row label="Network">{checkout.network.label}</Row>
       </Panel>
-      <Note>Include the memo exactly as shown. Without it we can&apos;t match your payment to this order.</Note>
-      <p className="flex items-center justify-center gap-2 text-sm text-muted" role="status">
+      <Note>
+        Include the memo exactly as shown. Without it we can&apos;t match your
+        payment to this order.
+      </Note>
+      <p
+        className="flex items-center justify-center gap-2 text-sm text-muted"
+        role="status"
+      >
         <Spinner className="size-3.5" /> Waiting for your payment…
       </p>
     </StatusScreen>
@@ -597,6 +802,7 @@ export function WalletApp({ checkout, controller }: Props) {
 
 /** The API gives the explorer link for the stored hash; a hash learned later reuses its pattern. */
 function explorerLink(checkout: Checkout, hash: string): string {
-  if (checkout.explorerUrl && checkout.transactionHash === hash) return checkout.explorerUrl;
+  if (checkout.explorerUrl && checkout.transactionHash === hash)
+    return checkout.explorerUrl;
   return `https://stellar.expert/explorer/${checkout.network.id}/tx/${hash}`;
 }

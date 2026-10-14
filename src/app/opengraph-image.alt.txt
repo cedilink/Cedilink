@@ -1,1 +1,1 @@
-Credlink Smartpay: accept USDC on Stellar with one link and a clear checkout.
+Cedilink Smartpay: accept USDC on Stellar with one link and a clear checkout.

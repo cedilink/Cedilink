@@ -1,7 +1,14 @@
 import type { Metadata, Viewport } from "next";
 import { Manrope } from "next/font/google";
 import { PwaProvider } from "@/components/pwa/pwa-provider";
-import { OPEN_GRAPH, SITE_DESCRIPTION, SITE_NAME, SITE_TITLE, SITE_URL, THEME_COLOR } from "@/lib/site";
+import {
+  OPEN_GRAPH,
+  SITE_DESCRIPTION,
+  SITE_NAME,
+  SITE_TITLE,
+  SITE_URL,
+  THEME_COLOR,
+} from "@/lib/site";
 import "./globals.css";
 
 const manrope = Manrope({
@@ -13,7 +20,9 @@ const manrope = Manrope({
 // Set these to the codes each search console gives you; leave unset to emit nothing.
 const verification = {
   google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION,
-  other: process.env.NEXT_PUBLIC_BING_SITE_VERIFICATION ? { "msvalidate.01": process.env.NEXT_PUBLIC_BING_SITE_VERIFICATION } : undefined,
+  other: process.env.NEXT_PUBLIC_BING_SITE_VERIFICATION
+    ? { "msvalidate.01": process.env.NEXT_PUBLIC_BING_SITE_VERIFICATION }
+    : undefined,
 };
 
 export const metadata: Metadata = {
@@ -26,8 +35,8 @@ export const metadata: Metadata = {
   applicationName: SITE_NAME,
   category: "finance",
   keywords: [
-    "Credlink",
-    "Credlink Smartpay",
+    "Cedilink",
+    "Cedilink Smartpay",
     "USDC payments",
     "Stellar USDC",
     "accept USDC",
@@ -36,17 +45,31 @@ export const metadata: Metadata = {
     "payment links",
     "Stellar payments for merchants",
   ],
-  authors: [{ name: "Credlink", url: SITE_URL }],
-  creator: "Credlink",
-  publisher: "Credlink",
+  authors: [{ name: "Cedilink", url: SITE_URL }],
+  creator: "Cedilink",
+  publisher: "Cedilink",
   // Stops phones turning payment IDs and amounts into phone links.
   formatDetection: { telephone: false, address: false, email: false },
-  openGraph: { ...OPEN_GRAPH, title: SITE_TITLE, description: SITE_DESCRIPTION },
-  twitter: { card: "summary_large_image", title: SITE_TITLE, description: SITE_DESCRIPTION },
+  openGraph: {
+    ...OPEN_GRAPH,
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
+  },
   robots: {
     index: true,
     follow: true,
-    googleBot: { index: true, follow: true, "max-image-preview": "large", "max-snippet": -1, "max-video-preview": -1 },
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+      "max-video-preview": -1,
+    },
   },
   appleWebApp: { capable: true, title: "Smartpay", statusBarStyle: "default" },
   verification,
@@ -60,7 +83,7 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en" className={`${manrope.variable} h-full antialiased`}>
-      <body className="min-h-full flex flex-col">
+      <body suppressHydrationWarning className="min-h-full flex flex-col">
         {children}
         <PwaProvider />
       </body>

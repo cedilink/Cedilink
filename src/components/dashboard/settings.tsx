@@ -1,11 +1,35 @@
 "use client";
 
 import { useQueryClient } from "@tanstack/react-query";
-import { Bell, Building2, Check, Eye, EyeOff, KeyRound, LogOut, Mail, MonitorSmartphone, ShieldCheck, Wallet } from "lucide-react";
+import {
+  Bell,
+  Building2,
+  Check,
+  Eye,
+  EyeOff,
+  KeyRound,
+  LogOut,
+  Mail,
+  MonitorSmartphone,
+  ShieldCheck,
+  Wallet,
+} from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useId, useState, type ReactNode } from "react";
-import { api, ApiError, type Account, type Notifications } from "@/lib/api/client";
-import { useChangeEmail, useChangePassword, useRevokeOtherSessions, useSaveNotifications, useSaveProfile, useStellarSettings } from "@/lib/dashboard/queries";
+import {
+  api,
+  ApiError,
+  type Account,
+  type Notifications,
+} from "@/lib/api/client";
+import {
+  useChangeEmail,
+  useChangePassword,
+  useRevokeOtherSessions,
+  useSaveNotifications,
+  useSaveProfile,
+  useStellarSettings,
+} from "@/lib/dashboard/queries";
 import { formatDate, truncateAddress } from "@/lib/format";
 import { Mascot } from "../motion/mascot";
 import { CopyButton } from "../ui/copy-button";
@@ -28,7 +52,11 @@ function useSectionInView(): SectionId {
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
-        const visible = entries.filter((entry) => entry.isIntersecting).sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top)[0];
+        const visible = entries
+          .filter((entry) => entry.isIntersecting)
+          .sort(
+            (a, b) => a.boundingClientRect.top - b.boundingClientRect.top,
+          )[0];
         if (visible) setActive(visible.target.id as SectionId);
       },
       // A band across the upper part of the screen: the section crossing it is the one being read.
@@ -46,7 +74,10 @@ function useSectionInView(): SectionId {
 function SectionNav() {
   const active = useSectionInView();
   return (
-    <nav aria-label="Settings sections" className="-mx-4 overflow-x-auto px-4 lg:sticky lg:top-6 lg:mx-0 lg:self-start lg:overflow-visible lg:px-0">
+    <nav
+      aria-label="Settings sections"
+      className="-mx-4 overflow-x-auto px-4 lg:sticky lg:top-6 lg:mx-0 lg:self-start lg:overflow-visible lg:px-0"
+    >
       <ul className="flex gap-1.5 lg:flex-col lg:gap-0.5">
         {SECTIONS.map(({ id, label, Icon }) => (
           <li key={id} className="shrink-0">
@@ -65,7 +96,17 @@ function SectionNav() {
   );
 }
 
-function Section({ id, title, description, children }: { id: SectionId; title: string; description: string; children: ReactNode }) {
+function Section({
+  id,
+  title,
+  description,
+  children,
+}: {
+  id: SectionId;
+  title: string;
+  description: string;
+  children: ReactNode;
+}) {
   const { Icon } = SECTIONS.find((section) => section.id === id)!;
   return (
     // The offset keeps the heading clear of the top edge when the side list jumps here.
@@ -89,7 +130,21 @@ function Section({ id, title, description, children }: { id: SectionId; title: s
 }
 
 /** The save button of a section, with what happened next to it. */
-function Actions({ label, pendingLabel, pending, disabled, saved, error }: { label: string; pendingLabel: string; pending: boolean; disabled?: boolean; saved?: string | false; error?: string }) {
+function Actions({
+  label,
+  pendingLabel,
+  pending,
+  disabled,
+  saved,
+  error,
+}: {
+  label: string;
+  pendingLabel: string;
+  pending: boolean;
+  disabled?: boolean;
+  saved?: string | false;
+  error?: string;
+}) {
   return (
     <div className="mt-5 flex flex-wrap items-center gap-3">
       <PillButton type="submit" disabled={pending || disabled}>
@@ -100,7 +155,10 @@ function Actions({ label, pendingLabel, pending, disabled, saved, error }: { lab
           {error}
         </span>
       ) : saved ? (
-        <span className="inline-flex items-center gap-1.5 text-sm text-paid" role="status">
+        <span
+          className="inline-flex items-center gap-1.5 text-sm text-paid"
+          role="status"
+        >
           <Check className="size-4" /> {saved}
         </span>
       ) : null}
@@ -109,14 +167,34 @@ function Actions({ label, pendingLabel, pending, disabled, saved, error }: { lab
 }
 
 /** Splits a failed save into messages for individual fields and one for the form as a whole. */
-function problems(error: unknown, fallback: string): { fields: Record<string, string>; form?: string } {
+function problems(
+  error: unknown,
+  fallback: string,
+): { fields: Record<string, string>; form?: string } {
   if (!error) return { fields: {} };
-  const fields = error instanceof ApiError ? ((error.details.fields ?? {}) as Record<string, string>) : {};
+  const fields =
+    error instanceof ApiError
+      ? ((error.details.fields ?? {}) as Record<string, string>)
+      : {};
   if (Object.keys(fields).length > 0) return { fields };
   return { fields, form: error instanceof ApiError ? error.message : fallback };
 }
 
-function PasswordInput({ id, name, value, onChange, autoComplete, invalid }: { id: string; name: string; value: string; onChange: (value: string) => void; autoComplete: string; invalid?: boolean }) {
+function PasswordInput({
+  id,
+  name,
+  value,
+  onChange,
+  autoComplete,
+  invalid,
+}: {
+  id: string;
+  name: string;
+  value: string;
+  onChange: (value: string) => void;
+  autoComplete: string;
+  invalid?: boolean;
+}) {
   const [shown, setShown] = useState(false);
   return (
     <span className="relative block">
@@ -147,16 +225,29 @@ function PasswordInput({ id, name, value, onChange, autoComplete, invalid }: { i
 function BusinessProfile({ account }: { account: Account }) {
   const save = useSaveProfile();
   const [name, setName] = useState(account.merchant.name);
-  const [businessName, setBusinessName] = useState(account.merchant.businessName);
-  const changed = name.trim() !== account.merchant.name || businessName.trim() !== account.merchant.businessName;
-  const { fields, form } = problems(save.error, "We couldn't save your profile. Please try again.");
-  const edit = (set: (value: string) => void) => (event: React.ChangeEvent<HTMLInputElement>) => {
-    set(event.target.value);
-    save.reset();
-  };
+  const [businessName, setBusinessName] = useState(
+    account.merchant.businessName,
+  );
+  const changed =
+    name.trim() !== account.merchant.name ||
+    businessName.trim() !== account.merchant.businessName;
+  const { fields, form } = problems(
+    save.error,
+    "We couldn't save your profile. Please try again.",
+  );
+  const edit =
+    (set: (value: string) => void) =>
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      set(event.target.value);
+      save.reset();
+    };
 
   return (
-    <Section id="business" title="Business profile" description="Who your customers are paying. Changes show on checkouts and emails straight away, including ones already sent.">
+    <Section
+      id="business"
+      title="Business profile"
+      description="Who your customers are paying. Changes show on checkouts and emails straight away, including ones already sent."
+    >
       <form
         onSubmit={(event) => {
           event.preventDefault();
@@ -165,11 +256,37 @@ function BusinessProfile({ account }: { account: Account }) {
       >
         <div className="grid gap-5 md:grid-cols-2">
           <div className="flex flex-col gap-5">
-            <Field label="Business name" error={fields.businessName} hint="Shown to customers as who is being paid.">
-              <input className={inputClass} name="businessName" value={businessName} onChange={edit(setBusinessName)} maxLength={80} autoComplete="organization" aria-invalid={Boolean(fields.businessName)} required />
+            <Field
+              label="Business name"
+              error={fields.businessName}
+              hint="Shown to customers as who is being paid."
+            >
+              <input
+                className={inputClass}
+                name="businessName"
+                value={businessName}
+                onChange={edit(setBusinessName)}
+                maxLength={80}
+                autoComplete="organization"
+                aria-invalid={Boolean(fields.businessName)}
+                required
+              />
             </Field>
-            <Field label="Your name" error={fields.name} hint="Used when we write to you. Customers do not see it.">
-              <input className={inputClass} name="name" value={name} onChange={edit(setName)} maxLength={80} autoComplete="name" aria-invalid={Boolean(fields.name)} required />
+            <Field
+              label="Your name"
+              error={fields.name}
+              hint="Used when we write to you. Customers do not see it."
+            >
+              <input
+                className={inputClass}
+                name="name"
+                value={name}
+                onChange={edit(setName)}
+                maxLength={80}
+                autoComplete="name"
+                aria-invalid={Boolean(fields.name)}
+                required
+              />
             </Field>
           </div>
           <div aria-hidden className="flex flex-col rounded-2xl bg-surface p-4">
@@ -177,17 +294,27 @@ function BusinessProfile({ account }: { account: Account }) {
             <div className="mt-3 rounded-2xl bg-white p-4">
               <p className="flex items-center gap-2.5 text-sm text-ink">
                 <Mascot size={32} />
-                <span className="min-w-0 truncate">{businessName.trim() || "Your business name"}</span>
+                <span className="min-w-0 truncate">
+                  {businessName.trim() || "Your business name"}
+                </span>
               </p>
               <p className="mt-4 text-xs text-muted">Amount due</p>
               <p className="text-2xl tracking-tight text-ink">$25.00</p>
             </div>
             <p className="mt-3 text-xs leading-relaxed text-muted">
-              Also used in payment request and receipt emails, and in the preview shown when a checkout link is shared.
+              Also used in payment request and receipt emails, and in the
+              preview shown when a checkout link is shared.
             </p>
           </div>
         </div>
-        <Actions label="Save profile" pendingLabel="Saving…" pending={save.isPending} disabled={!changed || !name.trim() || !businessName.trim()} saved={save.isSuccess && !changed && "Saved"} error={form} />
+        <Actions
+          label="Save profile"
+          pendingLabel="Saving…"
+          pending={save.isPending}
+          disabled={!changed || !name.trim() || !businessName.trim()}
+          saved={save.isSuccess && !changed && "Saved"}
+          error={form}
+        />
       </form>
     </Section>
   );
@@ -198,10 +325,17 @@ function SignInEmail({ account }: { account: Account }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const passwordId = useId();
-  const { fields, form } = problems(change.error, "We couldn't change your email. Please try again.");
+  const { fields, form } = problems(
+    change.error,
+    "We couldn't change your email. Please try again.",
+  );
 
   return (
-    <Section id="email" title="Sign-in email" description="The address you sign in with, and where payment notifications are sent.">
+    <Section
+      id="email"
+      title="Sign-in email"
+      description="The address you sign in with, and where payment notifications are sent."
+    >
       <form
         onSubmit={(event) => {
           event.preventDefault();
@@ -218,7 +352,9 @@ function SignInEmail({ account }: { account: Account }) {
       >
         <p className="mb-5 flex flex-wrap items-center gap-x-2.5 gap-y-1 rounded-2xl bg-surface px-4 py-3 text-sm">
           <span className="text-muted">Current email</span>
-          <span className="min-w-0 break-all text-ink">{account.merchant.email}</span>
+          <span className="min-w-0 break-all text-ink">
+            {account.merchant.email}
+          </span>
         </p>
         <div className="grid gap-5 md:grid-cols-2">
           <Field label="New email address" error={fields.email}>
@@ -236,7 +372,12 @@ function SignInEmail({ account }: { account: Account }) {
               required
             />
           </Field>
-          <Field label="Current password" htmlFor={passwordId} error={fields.currentPassword} hint="To confirm it is you.">
+          <Field
+            label="Current password"
+            htmlFor={passwordId}
+            error={fields.currentPassword}
+            hint="To confirm it is you."
+          >
             <PasswordInput
               id={passwordId}
               name="currentPassword"
@@ -255,7 +396,10 @@ function SignInEmail({ account }: { account: Account }) {
           pendingLabel="Changing…"
           pending={change.isPending}
           disabled={!email.trim() || !password}
-          saved={change.isSuccess && "Email changed. Use the new address next time you sign in."}
+          saved={
+            change.isSuccess &&
+            "Email changed. Use the new address next time you sign in."
+          }
           error={form}
         />
       </form>
@@ -271,7 +415,10 @@ function Password() {
   const [next, setNext] = useState("");
   const [confirm, setConfirm] = useState("");
   const id = useId();
-  const { fields, form } = problems(change.error, "We couldn't change your password. Please try again.");
+  const { fields, form } = problems(
+    change.error,
+    "We couldn't change your password. Please try again.",
+  );
   // Shown once something has been typed, not on an untouched form.
   const tooShort = next.length > 0 && next.length < MIN_PASSWORD;
   const mismatch = confirm.length > 0 && confirm !== next;
@@ -281,7 +428,11 @@ function Password() {
   };
 
   return (
-    <Section id="password" title="Password" description="Changing it signs you out on every other device.">
+    <Section
+      id="password"
+      title="Password"
+      description="Changing it signs you out on every other device."
+    >
       <form
         onSubmit={(event) => {
           event.preventDefault();
@@ -299,15 +450,53 @@ function Password() {
       >
         <div className="grid gap-5 md:grid-cols-2">
           <div className="md:col-span-2 md:max-w-[calc(50%-0.625rem)]">
-            <Field label="Current password" htmlFor={`${id}-current`} error={fields.currentPassword}>
-              <PasswordInput id={`${id}-current`} name="currentPassword" value={current} onChange={edit(setCurrent)} autoComplete="current-password" invalid={Boolean(fields.currentPassword)} />
+            <Field
+              label="Current password"
+              htmlFor={`${id}-current`}
+              error={fields.currentPassword}
+            >
+              <PasswordInput
+                id={`${id}-current`}
+                name="currentPassword"
+                value={current}
+                onChange={edit(setCurrent)}
+                autoComplete="current-password"
+                invalid={Boolean(fields.currentPassword)}
+              />
             </Field>
           </div>
-          <Field label="New password" error={tooShort ? `Use at least ${MIN_PASSWORD} characters.` : fields.newPassword} hint={`At least ${MIN_PASSWORD} characters.`} htmlFor={`${id}-new`}>
-            <PasswordInput id={`${id}-new`} name="newPassword" value={next} onChange={edit(setNext)} autoComplete="new-password" invalid={tooShort || Boolean(fields.newPassword)} />
+          <Field
+            label="New password"
+            error={
+              tooShort
+                ? `Use at least ${MIN_PASSWORD} characters.`
+                : fields.newPassword
+            }
+            hint={`At least ${MIN_PASSWORD} characters.`}
+            htmlFor={`${id}-new`}
+          >
+            <PasswordInput
+              id={`${id}-new`}
+              name="newPassword"
+              value={next}
+              onChange={edit(setNext)}
+              autoComplete="new-password"
+              invalid={tooShort || Boolean(fields.newPassword)}
+            />
           </Field>
-          <Field label="Confirm new password" htmlFor={`${id}-confirm`} error={mismatch ? "The two passwords do not match." : undefined}>
-            <PasswordInput id={`${id}-confirm`} name="confirmPassword" value={confirm} onChange={edit(setConfirm)} autoComplete="new-password" invalid={mismatch} />
+          <Field
+            label="Confirm new password"
+            htmlFor={`${id}-confirm`}
+            error={mismatch ? "The two passwords do not match." : undefined}
+          >
+            <PasswordInput
+              id={`${id}-confirm`}
+              name="confirmPassword"
+              value={confirm}
+              onChange={edit(setConfirm)}
+              autoComplete="new-password"
+              invalid={mismatch}
+            />
           </Field>
         </div>
         <Actions
@@ -315,7 +504,10 @@ function Password() {
           pendingLabel="Changing…"
           pending={change.isPending}
           disabled={!current || next.length < MIN_PASSWORD || confirm !== next}
-          saved={change.isSuccess && "Password changed. Other devices were signed out."}
+          saved={
+            change.isSuccess &&
+            "Password changed. Other devices were signed out."
+          }
           error={form}
         />
       </form>
@@ -323,29 +515,66 @@ function Password() {
   );
 }
 
-const NOTIFICATIONS: { key: keyof Notifications; title: string; text: string; to: string }[] = [
-  { key: "paymentReceived", title: "Payment received", text: "Tells you when a payment has been verified on Stellar and marked paid.", to: "Sent to you" },
-  { key: "customerRequest", title: "Payment request", text: "Sends your customer the checkout link when you create a payment with their email address.", to: "Sent to your customer" },
-  { key: "customerReceipt", title: "Receipt", text: "Sends your customer a receipt with the Stellar transaction once their payment is verified.", to: "Sent to your customer" },
+const NOTIFICATIONS: {
+  key: keyof Notifications;
+  title: string;
+  text: string;
+  to: string;
+}[] = [
+  {
+    key: "paymentReceived",
+    title: "Payment received",
+    text: "Tells you when a payment has been verified on Stellar and marked paid.",
+    to: "Sent to you",
+  },
+  {
+    key: "customerRequest",
+    title: "Payment request",
+    text: "Sends your customer the checkout link when you create a payment with their email address.",
+    to: "Sent to your customer",
+  },
+  {
+    key: "customerReceipt",
+    title: "Receipt",
+    text: "Sends your customer a receipt with the Stellar transaction once their payment is verified.",
+    to: "Sent to your customer",
+  },
 ];
 
 function EmailNotifications({ account }: { account: Account }) {
   const save = useSaveNotifications();
   // While a change is being saved the switch already shows it; a failed save falls back to what is stored.
-  const shown = save.isPending && save.variables ? save.variables : account.notifications;
+  const shown =
+    save.isPending && save.variables ? save.variables : account.notifications;
   return (
-    <Section id="notifications" title="Email notifications" description="Choose which emails Credlink sends for your payments. Changes are saved as you make them.">
+    <Section
+      id="notifications"
+      title="Email notifications"
+      description="Choose which emails Cedilink sends for your payments. Changes are saved as you make them."
+    >
       <ul>
         {NOTIFICATIONS.map(({ key, title, text, to }) => (
-          <li key={key} className="flex items-start justify-between gap-4 border-b border-line py-4 first:pt-0 last:border-0 last:pb-0">
+          <li
+            key={key}
+            className="flex items-start justify-between gap-4 border-b border-line py-4 first:pt-0 last:border-0 last:pb-0"
+          >
             <div>
               <p className="flex flex-wrap items-center gap-2 text-sm text-ink">
                 {title}
-                <span className="rounded-full bg-surface px-2 py-0.5 text-[11px] text-muted">{to}</span>
+                <span className="rounded-full bg-surface px-2 py-0.5 text-[11px] text-muted">
+                  {to}
+                </span>
               </p>
               <p className="mt-1 text-sm text-muted">{text}</p>
             </div>
-            <Toggle checked={shown[key]} label={title} disabled={save.isPending} onChange={(next) => save.mutate({ ...account.notifications, [key]: next })} />
+            <Toggle
+              checked={shown[key]}
+              label={title}
+              disabled={save.isPending}
+              onChange={(next) =>
+                save.mutate({ ...account.notifications, [key]: next })
+              }
+            />
           </li>
         ))}
       </ul>
@@ -355,7 +584,8 @@ function EmailNotifications({ account }: { account: Account }) {
         </p>
       ) : null}
       <p className="mt-4 rounded-2xl bg-surface px-4 py-3 text-xs leading-relaxed text-muted">
-        Security emails, such as a notice that your password or sign-in email changed, are always sent.
+        Security emails, such as a notice that your password or sign-in email
+        changed, are always sent.
       </p>
     </Section>
   );
@@ -373,28 +603,51 @@ function Detail({ label, children }: { label: string; children: ReactNode }) {
 function PaymentMethod() {
   const { data, error } = useStellarSettings();
   return (
-    <Section id="payments" title="Payment method" description="How you are paid. The receiving wallet is managed on the Stellar USDC page.">
+    <Section
+      id="payments"
+      title="Payment method"
+      description="How you are paid. The receiving wallet is managed on the Stellar USDC page."
+    >
       {error ? (
-        <p className="text-sm text-muted">We couldn&apos;t load your payment method just now.</p>
+        <p className="text-sm text-muted">
+          We couldn&apos;t load your payment method just now.
+        </p>
       ) : !data ? (
-        <div className="h-36 animate-pulse rounded-2xl bg-surface" aria-busy="true" aria-label="Loading payment method" />
+        <div
+          className="h-36 animate-pulse rounded-2xl bg-surface"
+          aria-busy="true"
+          aria-label="Loading payment method"
+        />
       ) : (
         <dl className="rounded-2xl border border-line px-4">
           <Detail label="Stellar USDC">
-            <span className={`rounded-full px-2.5 py-1 text-xs ${data.enabled ? "bg-paid-tint text-paid" : "bg-awaiting-tint text-awaiting"}`}>{data.enabled ? "Accepting payments" : "Switched off"}</span>
+            <span
+              className={`rounded-full px-2.5 py-1 text-xs ${data.enabled ? "bg-paid-tint text-paid" : "bg-awaiting-tint text-awaiting"}`}
+            >
+              {data.enabled ? "Accepting payments" : "Switched off"}
+            </span>
           </Detail>
           <Detail label="Network">{data.network.label}</Detail>
           <Detail label="Receiving wallet">
             {data.receivingAddress ? (
               <>
-                <span className="font-mono text-[13px]">{truncateAddress(data.receivingAddress, 6, 6)}</span>
-                <CopyButton value={data.receivingAddress} label="receiving wallet" />
+                <span className="font-mono text-[13px]">
+                  {truncateAddress(data.receivingAddress, 6, 6)}
+                </span>
+                <CopyButton
+                  value={data.receivingAddress}
+                  label="receiving wallet"
+                />
               </>
             ) : (
               <span className="text-muted">Not set yet</span>
             )}
           </Detail>
-          {data.receivingAddress ? <Detail label="Wallet type">{data.managed ? "Created for you by Credlink" : "Your own wallet"}</Detail> : null}
+          {data.receivingAddress ? (
+            <Detail label="Wallet type">
+              {data.managed ? "Created for you by Cedilink" : "Your own wallet"}
+            </Detail>
+          ) : null}
         </dl>
       )}
       <div className="mt-5">
@@ -415,19 +668,35 @@ function Security({ account }: { account: Account }) {
   const descriptionId = useId();
 
   return (
-    <Section id="security" title="Sessions and security" description="Where your account is signed in.">
+    <Section
+      id="security"
+      title="Sessions and security"
+      description="Where your account is signed in."
+    >
       <dl className="rounded-2xl border border-line px-4">
         <Detail label="Member since">{formatDate(account.memberSince)}</Detail>
         <Detail label="This device">
-          <span className="rounded-full bg-paid-tint px-2.5 py-1 text-xs text-paid">Signed in</span>
+          <span className="rounded-full bg-paid-tint px-2.5 py-1 text-xs text-paid">
+            Signed in
+          </span>
         </Detail>
         <Detail label="Other devices">
-          <span id={descriptionId}>{others === 0 ? "Not signed in anywhere else" : `Signed in on ${others} other ${others === 1 ? "device" : "devices"}`}</span>
+          <span id={descriptionId}>
+            {others === 0
+              ? "Not signed in anywhere else"
+              : `Signed in on ${others} other ${others === 1 ? "device" : "devices"}`}
+          </span>
         </Detail>
       </dl>
       <div className="mt-5 flex flex-wrap items-center gap-2">
-        <PillButton variant="soft" disabled={others === 0 || revoke.isPending} aria-describedby={descriptionId} onClick={() => revoke.mutate()}>
-          <MonitorSmartphone className="size-4" /> {revoke.isPending ? "Signing out…" : "Sign out other devices"}
+        <PillButton
+          variant="soft"
+          disabled={others === 0 || revoke.isPending}
+          aria-describedby={descriptionId}
+          onClick={() => revoke.mutate()}
+        >
+          <MonitorSmartphone className="size-4" />{" "}
+          {revoke.isPending ? "Signing out…" : "Sign out other devices"}
         </PillButton>
         <PillButton
           variant="soft"
@@ -439,10 +708,14 @@ function Security({ account }: { account: Account }) {
             router.replace("/login");
           }}
         >
-          <LogOut className="size-4" /> {leaving ? "Signing out…" : "Sign out of this device"}
+          <LogOut className="size-4" />{" "}
+          {leaving ? "Signing out…" : "Sign out of this device"}
         </PillButton>
         {revoke.isSuccess && others === 0 ? (
-          <span className="inline-flex items-center gap-1.5 text-sm text-paid" role="status">
+          <span
+            className="inline-flex items-center gap-1.5 text-sm text-paid"
+            role="status"
+          >
             <Check className="size-4" /> Other devices signed out
           </span>
         ) : revoke.error ? (
@@ -451,7 +724,10 @@ function Security({ account }: { account: Account }) {
           </span>
         ) : null}
       </div>
-      <p className="mt-4 text-xs leading-relaxed text-muted">A sign-in lasts 7 days. If you see devices you do not recognise, sign them out and change your password.</p>
+      <p className="mt-4 text-xs leading-relaxed text-muted">
+        A sign-in lasts 7 days. If you see devices you do not recognise, sign
+        them out and change your password.
+      </p>
     </Section>
   );
 }

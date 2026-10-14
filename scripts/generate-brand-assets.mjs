@@ -22,7 +22,10 @@ mkdirSync(out("public/screenshots"), { recursive: true });
 const browser = await chromium.launch({ channel: "chrome" });
 
 async function render(html, width, height) {
-  const context = await browser.newContext({ viewport: { width, height }, deviceScaleFactor: 1 });
+  const context = await browser.newContext({
+    viewport: { width, height },
+    deviceScaleFactor: 1,
+  });
   const page = await context.newPage();
   await page.setContent(html, { waitUntil: "load" });
   await page.evaluate(() => document.fonts.ready);
@@ -31,7 +34,12 @@ async function render(html, width, height) {
   return png;
 }
 
-const icon = (size) => render(`<body style="margin:0"><img src="${mascot}" style="display:block;width:${size}px;height:${size}px">`, size, size);
+const icon = (size) =>
+  render(
+    `<body style="margin:0"><img src="${mascot}" style="display:block;width:${size}px;height:${size}px">`,
+    size,
+    size,
+  );
 
 // Chrome writes opaque screenshots without an alpha channel, which .ico readers reject,
 // so favicon sizes are read back as raw pixels and encoded as RGBA PNGs here.
@@ -66,8 +74,17 @@ async function rgbaIcon(size) {
   header.set([8, 6, 0, 0, 0], 8); // 8 bits per channel, RGBA
   // Each row of pixels is prefixed with a zero: "no filter".
   const rows = Buffer.alloc(size * (size * 4 + 1));
-  for (let y = 0; y < size; y++) Buffer.from(pixels.slice(y * size * 4, (y + 1) * size * 4)).copy(rows, y * (size * 4 + 1) + 1);
-  return Buffer.concat([Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]), chunk("IHDR", header), chunk("IDAT", deflateSync(rows)), chunk("IEND", Buffer.alloc(0))]);
+  for (let y = 0; y < size; y++)
+    Buffer.from(pixels.slice(y * size * 4, (y + 1) * size * 4)).copy(
+      rows,
+      y * (size * 4 + 1) + 1,
+    );
+  return Buffer.concat([
+    Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]),
+    chunk("IHDR", header),
+    chunk("IDAT", deflateSync(rows)),
+    chunk("IEND", Buffer.alloc(0)),
+  ]);
 }
 
 // An .ico file is a small directory followed by the images, which may be PNGs as they are.
@@ -87,13 +104,25 @@ function ico(images) {
     offset += png.length;
     return entry;
   });
-  return Buffer.concat([header, ...entries, ...images.map((image) => image.png)]);
+  return Buffer.concat([
+    header,
+    ...entries,
+    ...images.map((image) => image.png),
+  ]);
 }
 
-for (const size of [96, 192, 512]) writeFileSync(out(`public/icons/icon-${size}.png`), await icon(size));
+for (const size of [96, 192, 512])
+  writeFileSync(out(`public/icons/icon-${size}.png`), await icon(size));
 writeFileSync(out("src/app/icon.png"), await icon(192));
 writeFileSync(out("src/app/apple-icon.png"), await icon(180));
-writeFileSync(out("src/app/favicon.ico"), ico(await Promise.all([16, 32, 48].map(async (size) => ({ size, png: await rgbaIcon(size) })))));
+writeFileSync(
+  out("src/app/favicon.ico"),
+  ico(
+    await Promise.all(
+      [16, 32, 48].map(async (size) => ({ size, png: await rgbaIcon(size) })),
+    ),
+  ),
+);
 
 const card = `<!doctype html>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600&display=block">
@@ -107,20 +136,33 @@ const card = `<!doctype html>
   .art img { width: 320px; height: 320px; border-radius: 72px; }
 </style>
 <div class="text">
-  <div class="brand">Credlink Smartpay</div>
+  <div class="brand">Cedilink Smartpay</div>
   <h1>Accept USDC on Stellar.<br>One link.<br>A clear checkout.</h1>
-  <div class="foot">credlink.cc · Built for Ghanaian merchants</div>
+  <div class="foot">cedilink.com · Built for Ghanaian merchants</div>
 </div>
 <div class="art"><img src="${mascot}"></div>`;
-writeFileSync(out("src/app/opengraph-image.png"), await render(card, 1200, 630));
+writeFileSync(
+  out("src/app/opengraph-image.png"),
+  await render(card, 1200, 630),
+);
 
 if (process.env.FRONTEND_URL) {
-  for (const [name, width, height, scale] of [["wide", 1280, 720, 1], ["narrow", 390, 844, 2]]) {
-    const context = await browser.newContext({ viewport: { width, height }, deviceScaleFactor: scale, reducedMotion: "reduce" });
+  for (const [name, width, height, scale] of [
+    ["wide", 1280, 720, 1],
+    ["narrow", 390, 844, 2],
+  ]) {
+    const context = await browser.newContext({
+      viewport: { width, height },
+      deviceScaleFactor: scale,
+      reducedMotion: "reduce",
+    });
     const page = await context.newPage();
     await page.goto(process.env.FRONTEND_URL, { waitUntil: "networkidle" });
     await page.waitForTimeout(1500);
-    writeFileSync(out(`public/screenshots/landing-${name}.png`), await page.screenshot({ type: "png" }));
+    writeFileSync(
+      out(`public/screenshots/landing-${name}.png`),
+      await page.screenshot({ type: "png" }),
+    );
     await context.close();
   }
 }

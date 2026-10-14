@@ -3,9 +3,19 @@ import type { Checkout } from "@/lib/api/client";
 /**
  * A SEP-7 payment link (`web+stellar:pay?...`). Wallet apps that support the standard open
  * with the destination, amount, asset and memo already filled in. The memo is the payment
- * ID, which is how Credlink matches the incoming transfer to this checkout.
+ * ID, which is how Cedilink matches the incoming transfer to this checkout.
  */
-export function walletAppLink(checkout: Pick<Checkout, "recipientAddress" | "amount" | "asset" | "assetIssuer" | "paymentId" | "network">): string {
+export function walletAppLink(
+  checkout: Pick<
+    Checkout,
+    | "recipientAddress"
+    | "amount"
+    | "asset"
+    | "assetIssuer"
+    | "paymentId"
+    | "network"
+  >,
+): string {
   const params = new URLSearchParams({
     destination: checkout.recipientAddress,
     amount: checkout.amount,
