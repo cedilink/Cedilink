@@ -1,0 +1,342 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Empty, loading and error states · Cedilink</title>
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600&display=swap"
+    />
+    <link rel="stylesheet" href="styles.css" />
+    <style>
+      body {
+        background: var(--surface);
+      }
+      .wrap {
+        max-width: 1360px;
+        margin: 0 auto;
+        padding: 40px 24px 64px;
+        display: flex;
+        flex-direction: column;
+        gap: 28px;
+      }
+      .board {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(min(100%, 600px), 1fr));
+        gap: 24px;
+      }
+      .state {
+        background: #fff;
+        border-radius: 24px;
+        padding: 24px;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        min-width: 0;
+      }
+      .tag {
+        font-size: 12px;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: var(--muted);
+      }
+      .empty {
+        border: 1px dashed #e2e2e2;
+        border-radius: 20px;
+        padding: 32px 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: 10px;
+      }
+      .empty img {
+        width: 120px;
+        height: auto;
+      }
+      .empty h3 {
+        font-size: 18px;
+        font-weight: 400;
+      }
+      .empty p {
+        font-size: 14px;
+        color: var(--heading);
+        max-width: 360px;
+      }
+      .mini-stats {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 10px;
+      }
+      .mini-stats div {
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        padding: 12px;
+        font-size: 12px;
+        color: var(--heading);
+      }
+      .mini-stats strong {
+        display: block;
+        font-size: 22px;
+        font-weight: 400;
+        color: var(--ink);
+        margin-top: 4px;
+      }
+      .chips {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+      .chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        min-height: 36px;
+        padding: 0 14px;
+        border-radius: 999px;
+        background: #f1f1f1;
+        font-size: 13px;
+      }
+      .chip.on {
+        background: var(--brand-tint);
+        color: var(--brand);
+      }
+      .skrow {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr 1.4fr;
+        gap: 16px;
+        align-items: center;
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        padding: 20px;
+      }
+      @media (max-width: 600px) {
+        .mini-stats {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <div>
+        <h1 class="title">Empty, loading and error states</h1>
+        <p class="sub">
+          Content area only. Each sits inside the merchant shell, below the page
+          title.
+        </p>
+      </div>
+
+      <div class="board">
+        <section class="state" aria-labelledby="s1">
+          <p class="tag" id="s1">Dashboard · new merchant</p>
+          <div class="mini-stats">
+            <div>Verified payments<strong>$0</strong></div>
+            <div>Pending requests<strong>0</strong></div>
+            <div>Unmatched payments<strong>0</strong></div>
+            <div>Payment links<strong>0</strong></div>
+          </div>
+          <div class="empty">
+            <img
+              src="../../../src/assets/illustrations/empty-payments.svg"
+              alt=""
+            />
+            <h3>No activity yet</h3>
+            <p>
+              Create a payment link and share it with a customer. Payments and
+              checks will show up here.
+            </p>
+            <a class="btn pri" href="create-payment.html"
+              >Create payment link</a
+            >
+          </div>
+        </section>
+
+        <section class="state" aria-labelledby="s2">
+          <p class="tag" id="s2">Dashboard · Stellar USDC not set up</p>
+          <div
+            class="empty"
+            style="
+              border-style: solid;
+              background: var(--brand-wash, #edf0fe);
+              border-color: #dfe3fb;
+            "
+          >
+            <h3>Add a receiving wallet to start</h3>
+            <p>
+              Payment links need a Stellar wallet to receive USDC. It takes
+              about a minute.
+            </p>
+            <a class="btn pri" href="#">Set up Stellar USDC</a>
+          </div>
+        </section>
+
+        <section class="state" aria-labelledby="s3">
+          <p class="tag" id="s3">Link management · no links</p>
+          <div class="empty">
+            <img
+              src="../../../src/assets/illustrations/empty-payments.svg"
+              alt=""
+            />
+            <h3>No payment links yet</h3>
+            <p>
+              Each link is a checkout page for one order. Your customer pays
+              with USDC on Stellar.
+            </p>
+            <a class="btn pri" href="create-payment.html"
+              >Create payment link</a
+            >
+          </div>
+        </section>
+
+        <section class="state" aria-labelledby="s4">
+          <p class="tag" id="s4">Transaction history · no results</p>
+          <div class="chips">
+            <span class="chip on">Date: Last 7 days ✕</span>
+            <span class="chip on">Status: Flagged ✕</span>
+            <span class="chip">Asset: All</span>
+          </div>
+          <div class="empty">
+            <h3>No transactions match these filters</h3>
+            <p>
+              Nothing was flagged in the last 7 days. Try a wider date range or
+              clear the filters.
+            </p>
+            <button class="btn tint">Clear filters</button>
+          </div>
+        </section>
+
+        <section class="state" aria-labelledby="s5">
+          <p class="tag" id="s5">Reconciliation · all clear</p>
+          <div class="chips">
+            <span class="chip">Matched · 32</span
+            ><span class="chip on">Unmatched · 0</span
+            ><span class="chip">Resolved · 4</span>
+          </div>
+          <div class="empty">
+            <img src="../../../src/assets/illustrations/high-five.svg" alt="" />
+            <h3>Everything matches</h3>
+            <p>
+              Every payment that reached your wallet matches a request. New
+              mismatches will appear here and in your notifications.
+            </p>
+          </div>
+        </section>
+
+        <section class="state" aria-labelledby="s6">
+          <p class="tag" id="s6">Any list · loading</p>
+          <div class="sk" style="height: 52px; border-radius: 14px"></div>
+          <div class="skrow" aria-hidden="true">
+            <div class="sk" style="height: 14px"></div>
+            <div class="sk" style="height: 14px; width: 60%"></div>
+            <div
+              class="sk"
+              style="height: 28px; width: 90px; border-radius: 999px"
+            ></div>
+            <div class="sk" style="height: 14px"></div>
+          </div>
+          <div class="skrow" aria-hidden="true">
+            <div class="sk" style="height: 14px"></div>
+            <div class="sk" style="height: 14px; width: 60%"></div>
+            <div
+              class="sk"
+              style="height: 28px; width: 90px; border-radius: 999px"
+            ></div>
+            <div class="sk" style="height: 14px"></div>
+          </div>
+          <div class="skrow" aria-hidden="true">
+            <div class="sk" style="height: 14px"></div>
+            <div class="sk" style="height: 14px; width: 60%"></div>
+            <div
+              class="sk"
+              style="height: 28px; width: 90px; border-radius: 999px"
+            ></div>
+            <div class="sk" style="height: 14px"></div>
+          </div>
+          <p class="small muted" role="status">Loading transactions…</p>
+        </section>
+
+        <section class="state" aria-labelledby="s7">
+          <p class="tag" id="s7">Any page · failed to load</p>
+          <div class="empty">
+            <span
+              aria-hidden="true"
+              style="
+                width: 56px;
+                height: 56px;
+                border-radius: 999px;
+                background: var(--failed-tint);
+                color: var(--failed);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+              "
+              ><svg
+                width="26"
+                height="26"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.8"
+              >
+                <circle cx="12" cy="12" r="9" />
+                <path d="M12 7.5v5M12 16h.01" /></svg
+            ></span>
+            <h3>Couldn't load transactions</h3>
+            <p>
+              Your payments are safe. This is a problem loading the page. Try
+              again in a moment.
+            </p>
+            <button class="btn pri">Try again</button>
+          </div>
+        </section>
+
+        <section class="state" aria-labelledby="s8">
+          <p class="tag" id="s8">Any page · live updates paused</p>
+          <div
+            role="status"
+            style="
+              display: flex;
+              align-items: center;
+              gap: 12px;
+              background: var(--awaiting-tint);
+              color: var(--awaiting);
+              border-radius: 16px;
+              padding: 14px 18px;
+              font-size: 14px;
+              flex-wrap: wrap;
+            "
+          >
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+              aria-hidden="true"
+            >
+              <path d="M4 12a8 8 0 0 1 14-5.3M20 12a8 8 0 0 1-14 5.3" />
+              <path d="M18 3v4h-4M6 21v-4h4" />
+            </svg>
+            <span style="flex: 1 1 220px"
+              >Live updates paused. Reconnecting… New payments are still being
+              recorded.</span
+            >
+            <button
+              class="btn"
+              style="min-height: 36px; background: #fff; color: var(--awaiting)"
+            >
+              Refresh now
+            </button>
+          </div>
+          <p class="small muted">
+            Shown under the top bar when the live connection drops for more than
+            10 seconds.
+          </p>
+        </section>
+      </div>
+    </div>
+  </body>
+</html>

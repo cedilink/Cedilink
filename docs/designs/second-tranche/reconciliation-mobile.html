@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Reconciliation · mobile · Cedilink</title>
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600&display=swap"
+    />
+    <link rel="stylesheet" href="styles.css" />
+    <style>
+      .m {
+        max-width: 430px;
+        margin: 0 auto;
+        min-height: 100vh;
+        position: relative;
+        overflow: hidden;
+      }
+      .mtop {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        padding: 8px 8px 0;
+        font-size: 15px;
+      }
+      .mtop p {
+        flex: 1;
+      }
+      .mc {
+        padding: 8px 16px 24px;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+      .rcard {
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        padding: 16px;
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 6px 12px;
+        font-size: 14px;
+        text-decoration: none;
+        color: var(--ink);
+      }
+      .sheet {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: #fff;
+        border-radius: 24px 24px 0 0;
+        padding: 10px 16px 24px;
+        z-index: 11;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        box-shadow: 0 -12px 40px rgba(0, 0, 0, 0.15);
+      }
+      .grab {
+        width: 40px;
+        height: 5px;
+        border-radius: 99px;
+        background: #d9d9d9;
+        margin: 0 auto 4px;
+      }
+      .check {
+        grid-template-columns: 84px minmax(0, 1fr) 12px;
+        padding: 12px 8px;
+        font-size: 13px;
+      }
+      .check b {
+        font-size: 15px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="m">
+      <div aria-hidden="true">
+        <div class="mtop">
+          <span class="ibtn"
+            ><svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.6"
+            >
+              <path d="M4 7h16M4 12h16M4 17h16" /></svg
+          ></span>
+          <p>Reconciliation</p>
+          <span class="ibtn"
+            ><svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.6"
+            >
+              <path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15z" />
+              <path d="M10 20a2 2 0 0 0 4 0" /></svg
+          ></span>
+        </div>
+        <div class="mc">
+          <div>
+            <h1 class="title">Reconciliation</h1>
+            <p class="sub">Verify payments against your requests</p>
+          </div>
+          <div class="seg">
+            <span class="btn" style="background: #f1f1f1">Matched · 32</span
+            ><span class="btn pri">Unmatched · 3</span>
+          </div>
+          <div class="rcard">
+            <span>CDL-003</span><span class="pill flag">Flagged</span
+            ><span>90 → 100 USDC</span><span class="hash small">7a2d…e060</span>
+          </div>
+          <div class="rcard">
+            <span>CDL-005</span><span class="pill flag">Flagged</span
+            ><span class="bad" style="font-weight: 400">75 XLM → USDC</span
+            ><span class="hash small">1e75…f8b1</span>
+          </div>
+        </div>
+      </div>
+
+      <div
+        class="scrim"
+        style="position: absolute; align-items: flex-end; padding: 0"
+      ></div>
+      <section
+        class="sheet"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="st"
+      >
+        <div class="grab" aria-hidden="true"></div>
+        <div style="display: flex; align-items: center; gap: 8px">
+          <h2 id="st" style="flex: 1; font-size: 18px; font-weight: 400">
+            Flagged · CDL-003
+          </h2>
+          <button class="ibtn" aria-label="Close">
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+              aria-hidden="true"
+            >
+              <path d="M6 6l12 12M18 6L6 18" />
+            </svg>
+          </button>
+        </div>
+        <p style="font-size: 14px">
+          Received 100 USDC against 90 USDC expected.
+        </p>
+        <div>
+          <div class="check" style="border-top: 0">
+            <b>Recipient</b><span>Matches G…XXXX</span
+            ><span class="dot g" role="img" aria-label="Passed"></span>
+          </div>
+          <div class="check">
+            <b>Asset</b><span>USDC matches USDC</span
+            ><span class="dot g" role="img" aria-label="Passed"></span>
+          </div>
+          <div class="check miss">
+            <b>Amount</b><span>90 expected · 100 received</span
+            ><span class="dot r" role="img" aria-label="Failed"></span>
+          </div>
+          <div class="check">
+            <b>Reference</b><span>CDL-003 matches</span
+            ><span class="dot g" role="img" aria-label="Passed"></span>
+          </div>
+        </div>
+        <a href="transaction-detail.html" class="small"
+          >View transaction 7a2d54bf…c731e060</a
+        >
+        <div style="display: grid; grid-template-columns: 1fr 1.4fr; gap: 10px">
+          <button class="btn ghost">Dismiss</button>
+          <a class="btn pri" href="accept-dialog.html">Accept as paid</a>
+        </div>
+      </section>
+    </div>
+  </body>
+</html>

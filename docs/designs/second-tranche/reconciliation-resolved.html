@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Resolved · Reconciliation · Cedilink</title>
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600&display=swap"
+    />
+    <link rel="stylesheet" href="styles.css" />
+    <style>
+      .rr {
+        grid-template-columns: minmax(90px, 0.9fr) minmax(130px, 1.3fr) minmax(
+            150px,
+            1.5fr
+          ) minmax(170px, 1.8fr) minmax(130px, 1fr);
+      }
+    </style>
+  </head>
+  <body data-active="reconciliation" data-crumbs="Workspace|Reconciliation">
+    <div class="app">
+      <main class="main">
+        <div
+          role="status"
+          style="
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: var(--paid-tint);
+            color: var(--paid);
+            border-radius: 16px;
+            padding: 14px 18px;
+            font-size: 14px;
+          "
+        >
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.8"
+            aria-hidden="true"
+          >
+            <circle cx="12" cy="12" r="9" />
+            <path d="M8.5 12l2.5 2.5 4.5-5" />
+          </svg>
+          <span style="flex: 1"
+            >CDL-003 accepted as paid. A receipt was sent to the customer.</span
+          >
+          <a href="payment-details.html" style="color: var(--paid)"
+            >View payment</a
+          >
+        </div>
+
+        <div class="phead">
+          <div>
+            <h1 class="title">Reconciliation</h1>
+            <p class="sub">
+              Verify payments against your requests · Stellar Testnet
+            </p>
+          </div>
+          <nav class="seg" aria-label="Reconciliation views">
+            <a href="#">Matched · 33</a>
+            <a href="reconciliation.html">Unmatched · 2</a>
+            <a href="#" class="on" aria-current="page">Resolved · 5</a>
+          </nav>
+        </div>
+
+        <div class="scrollx">
+          <div class="rows">
+            <div class="thead rr">
+              <span>Request</span><span>Expected vs Received</span
+              ><span>Decision</span><span>By</span><span>Tx hash</span>
+            </div>
+            <a class="trow rr sel" href="#d"
+              ><span>CDL-003</span><span>90 → 100</span
+              ><span
+                ><span class="pill ok"
+                  ><svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    aria-hidden="true"
+                  >
+                    <circle cx="12" cy="12" r="9" />
+                    <path d="M8.5 12l2.5 2.5 4.5-5" /></svg
+                  >Accepted as paid</span
+                ></span
+              ><span class="small">Ama Boateng · 09 Oct, 11:02</span
+              ><span class="hash">7a2d54bf…c731e060</span></a
+            >
+            <a class="trow rr" href="#"
+              ><span>CDL-011</span><span>40 → 35</span
+              ><span
+                ><span class="pill gray"
+                  ><svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    aria-hidden="true"
+                  >
+                    <path d="M6 6l12 12M18 6L6 18" /></svg
+                  >Dismissed</span
+                ></span
+              ><span class="small">Ama Boateng · 08 Oct, 16:40</span
+              ><span class="hash">0d6c18aa…5b9e3c27</span></a
+            >
+            <a class="trow rr" href="#"
+              ><span>CDL-007</span><span>50 → 50</span
+              ><span
+                ><span class="pill ok"
+                  ><svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    aria-hidden="true"
+                  >
+                    <circle cx="12" cy="12" r="9" />
+                    <path d="M8.5 12l2.5 2.5 4.5-5" /></svg
+                  >Accepted as paid</span
+                ></span
+              ><span class="small">Ama Boateng · 08 Oct, 09:15</span
+              ><span class="hash">9e02b7c4…a1f0d863</span></a
+            >
+          </div>
+        </div>
+
+        <section
+          id="d"
+          class="card"
+          style="max-width: 780px; padding: 24px"
+          aria-labelledby="dh"
+        >
+          <div
+            style="
+              display: flex;
+              gap: 12px;
+              align-items: center;
+              flex-wrap: wrap;
+            "
+          >
+            <h2 id="dh" style="font-size: 18px; font-weight: 400; flex: 1">
+              CDL-003 · resolved
+            </h2>
+            <span class="pill ok">Confirmed</span>
+          </div>
+          <dl class="kv">
+            <dt>Decision</dt>
+            <dd>Accepted as paid</dd>
+            <dt>By</dt>
+            <dd>Ama Boateng</dd>
+            <dt>When</dt>
+            <dd>09 Oct 2026, 11:02 UTC</dd>
+            <dt>Note</dt>
+            <dd>Customer added a 10 USDC tip</dd>
+            <dt>Original issue</dt>
+            <dd>Amount: 90 expected · 100 received</dd>
+          </dl>
+          <p class="small muted" style="margin-top: 16px">
+            Kept for your records. Resolved items appear in Transaction history
+            and the CSV export with their decision.
+          </p>
+        </section>
+      </main>
+    </div>
+    <script src="shell.js"></script>
+  </body>
+</html>

@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Create payment link · Cedilink</title>
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600&display=swap"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body data-active="links" data-crumbs="Workspace|Link management|New link">
+    <div class="app">
+      <main class="main">
+        <div class="phead">
+          <div>
+            <h1 class="title">Create payment link</h1>
+            <p class="sub">Stellar Testnet · paid to G…XXXX</p>
+          </div>
+        </div>
+
+        <form
+          class="card"
+          style="
+            max-width: 720px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            padding: 24px;
+          "
+          onsubmit="return false;"
+        >
+          <div class="field">
+            <label for="p">Product or service</label>
+            <input id="p" class="input" value="Ghana Web3 Conference Ticket" />
+          </div>
+          <div class="grid2">
+            <div class="field">
+              <label for="a">Amount</label>
+              <input id="a" class="input" value="25.00" inputmode="decimal" />
+            </div>
+            <div class="field">
+              <label for="as">Asset</label>
+              <select id="as" class="input">
+                <option>USDC</option>
+                <option disabled>XLM · coming soon</option>
+              </select>
+            </div>
+          </div>
+          <div class="field">
+            <label for="o">Order ID or reference</label>
+            <input id="o" class="input" value="CD-2026-00124" />
+            <span class="hint">Your own reference. Must be unique.</span>
+          </div>
+          <div class="field">
+            <span class="lbl">Payment destination</span>
+            <div
+              class="input"
+              style="
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                background: #fafafa;
+              "
+            >
+              <span class="dot g"></span>Receiving wallet G…XXXX
+              <a href="#" class="small" style="margin-left: auto">Change</a>
+            </div>
+          </div>
+
+          <div
+            style="
+              border-top: 1px solid var(--line);
+              padding-top: 20px;
+              display: flex;
+              flex-direction: column;
+              gap: 16px;
+            "
+          >
+            <p style="font-size: 16px">
+              Customer information <span class="small muted">Optional</span>
+            </p>
+            <div class="grid2">
+              <div class="field">
+                <label for="cn">Customer name</label>
+                <input
+                  id="cn"
+                  class="input"
+                  placeholder="Enter customer name"
+                />
+              </div>
+              <div class="field">
+                <label for="ce">Email address</label>
+                <input
+                  id="ce"
+                  class="input"
+                  type="email"
+                  placeholder="Enter email address"
+                />
+              </div>
+            </div>
+            <div class="field" style="max-width: 340px">
+              <label for="cr">Customer reference</label>
+              <input id="cr" class="input" placeholder="e.g. CUS-101" />
+              <span class="hint"
+                >Your ID for this customer. Searchable in Transaction
+                history.</span
+              >
+            </div>
+          </div>
+
+          <div class="actions" style="justify-content: flex-end">
+            <a class="btn ghost" href="#">Cancel</a>
+            <button class="btn pri" type="submit">Generate payment link</button>
+          </div>
+        </form>
+      </main>
+    </div>
+    <script src="shell.js"></script>
+  </body>
+</html>

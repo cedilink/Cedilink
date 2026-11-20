@@ -1,0 +1,388 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Payment details · Cedilink</title>
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600&display=swap"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body data-active="links" data-crumbs="Workspace|Link management|CDL-003">
+    <div class="app">
+      <main class="main">
+        <div class="phead">
+          <div>
+            <div
+              style="
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                flex-wrap: wrap;
+              "
+            >
+              <h1 class="title">Marketing package</h1>
+              <span class="pill flag"
+                ><svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  aria-hidden="true"
+                >
+                  <circle cx="12" cy="12" r="9" />
+                  <path d="M12 7.5v5M12 16h.01" /></svg
+                >Flagged</span
+              >
+            </div>
+            <p class="sub">CDL-003 · Order CD-2026-00124 · Stellar Testnet</p>
+          </div>
+          <div class="actions">
+            <button class="btn tint">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.8"
+                aria-hidden="true"
+              >
+                <rect x="8" y="8" width="12" height="12" rx="2" />
+                <path
+                  d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"
+                /></svg
+              >Copy link
+            </button>
+            <a class="btn tint" href="check-transaction.html"
+              ><svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.8"
+                aria-hidden="true"
+              >
+                <circle cx="11" cy="11" r="6" />
+                <path d="M20 20l-4.5-4.5" /></svg
+              >Check a transaction</a
+            >
+            <button class="btn danger">Cancel link</button>
+          </div>
+        </div>
+
+        <section
+          aria-label="Needs review"
+          style="
+            display: flex;
+            gap: 16px;
+            align-items: center;
+            flex-wrap: wrap;
+            background: #fdf3f3;
+            border: 1px solid #f6d5d5;
+            border-radius: 20px;
+            padding: 18px 20px;
+          "
+        >
+          <span
+            aria-hidden="true"
+            style="
+              width: 40px;
+              height: 40px;
+              border-radius: 999px;
+              background: var(--failed-tint);
+              color: var(--failed);
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              flex: none;
+            "
+            ><svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+            >
+              <circle cx="12" cy="12" r="9" />
+              <path d="M12 7.5v5M12 16h.01" /></svg
+          ></span>
+          <div style="flex: 1 1 320px; min-width: 0">
+            <p style="font-size: 15px; font-weight: 500">
+              A payment arrived that doesn't match this request
+            </p>
+            <p style="margin-top: 4px; font-size: 14px; color: var(--heading)">
+              Received 100 USDC against 90 USDC expected. Accept it as paid, or
+              dismiss it and refund the customer from your wallet.
+            </p>
+          </div>
+          <div class="actions">
+            <button class="btn ghost">Dismiss</button>
+            <a class="btn pri" href="accept-dialog.html">Accept as paid</a>
+          </div>
+        </section>
+
+        <div class="cols">
+          <div class="stack">
+            <section class="card" aria-labelledby="er">
+              <h2 id="er">Expected vs received</h2>
+              <div class="er head">
+                <span>Check</span><span>Expected</span><span>Received</span
+                ><span></span>
+              </div>
+              <div class="er">
+                <span>Amount</span><span>90 USDC</span
+                ><span class="bad">100 USDC · overpaid</span
+                ><span class="dot r" role="img" aria-label="Mismatch"></span>
+              </div>
+              <div class="er">
+                <span>Asset</span><span>USDC</span><span>USDC</span
+                ><span class="dot g" role="img" aria-label="Matches"></span>
+              </div>
+              <div class="er">
+                <span>Recipient</span><span>G…XXXX</span><span>G…XXXX</span
+                ><span class="dot g" role="img" aria-label="Matches"></span>
+              </div>
+              <div class="er">
+                <span>Reference</span><span>CDL-003</span><span>CDL-003</span
+                ><span class="dot g" role="img" aria-label="Matches"></span>
+              </div>
+            </section>
+
+            <section class="card" aria-labelledby="pi">
+              <h2 id="pi">Payment information</h2>
+              <dl class="kv">
+                <dt>Payment link</dt>
+                <dd><a href="#">smartpay.cedilink.com/c/CDL-003</a></dd>
+                <dt>Order ID</dt>
+                <dd>CD-2026-00124</dd>
+                <dt>Customer</dt>
+                <dd>Kofi Mensah · kofi@example.com</dd>
+                <dt>Customer reference</dt>
+                <dd>CUS-103</dd>
+                <dt>Destination wallet</dt>
+                <dd>G…XXXX</dd>
+                <dt>Created</dt>
+                <dd>09 Oct 2026, 10:24 UTC</dd>
+                <dt>Expires</dt>
+                <dd>10 Oct 2026, 10:24 UTC</dd>
+              </dl>
+            </section>
+          </div>
+
+          <div class="stack">
+            <section class="card" aria-labelledby="ip">
+              <div
+                style="
+                  display: flex;
+                  align-items: center;
+                  gap: 8px;
+                  margin-bottom: 12px;
+                "
+              >
+                <h2 id="ip" style="flex: 1">Incoming payments</h2>
+                <span class="small muted">1 payment</span>
+              </div>
+              <a
+                href="transaction-detail.html"
+                style="
+                  display: flex;
+                  align-items: center;
+                  gap: 12px;
+                  padding: 14px;
+                  border: 1px solid var(--line);
+                  border-radius: 14px;
+                  text-decoration: none;
+                  color: var(--ink);
+                  flex-wrap: wrap;
+                "
+              >
+                <span style="flex: 1 1 180px; min-width: 0">
+                  <span style="display: block; font-size: 15px"
+                    >100 USDC from G…7K2Q</span
+                  >
+                  <span
+                    class="hash small"
+                    style="display: block; margin-top: 2px"
+                    >7a2d54bf…c731e060</span
+                  >
+                  <span
+                    class="small muted"
+                    style="display: block; margin-top: 2px"
+                    >09 Oct 2026, 10:26 UTC · Ledger 1,284,551</span
+                  >
+                </span>
+                <span class="pill flag">Overpaid</span>
+              </a>
+            </section>
+
+            <section class="card" aria-labelledby="vf">
+              <h2 id="vf" style="margin-bottom: 12px">Verification</h2>
+              <ul
+                style="
+                  list-style: none;
+                  margin: 0;
+                  padding: 0;
+                  display: flex;
+                  flex-direction: column;
+                  gap: 12px;
+                  font-size: 14px;
+                "
+              >
+                <li style="display: flex; gap: 10px; align-items: center">
+                  <svg
+                    width="18"
+                    height="18"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="#0f7b4b"
+                    stroke-width="1.8"
+                    aria-hidden="true"
+                  >
+                    <circle cx="12" cy="12" r="9" />
+                    <path d="M8.5 12l2.5 2.5 4.5-5" /></svg
+                  >Transaction exists
+                </li>
+                <li style="display: flex; gap: 10px; align-items: center">
+                  <svg
+                    width="18"
+                    height="18"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="#0f7b4b"
+                    stroke-width="1.8"
+                    aria-hidden="true"
+                  >
+                    <circle cx="12" cy="12" r="9" />
+                    <path d="M8.5 12l2.5 2.5 4.5-5" /></svg
+                  >Transaction successful
+                </li>
+                <li style="display: flex; gap: 10px; align-items: center">
+                  <svg
+                    width="18"
+                    height="18"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="#0f7b4b"
+                    stroke-width="1.8"
+                    aria-hidden="true"
+                  >
+                    <circle cx="12" cy="12" r="9" />
+                    <path d="M8.5 12l2.5 2.5 4.5-5" /></svg
+                  >Destination matches
+                </li>
+                <li style="display: flex; gap: 10px; align-items: center">
+                  <svg
+                    width="18"
+                    height="18"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="#0f7b4b"
+                    stroke-width="1.8"
+                    aria-hidden="true"
+                  >
+                    <circle cx="12" cy="12" r="9" />
+                    <path d="M8.5 12l2.5 2.5 4.5-5" /></svg
+                  >Asset matches
+                </li>
+                <li
+                  style="
+                    display: flex;
+                    gap: 10px;
+                    align-items: center;
+                    color: var(--failed);
+                  "
+                >
+                  <svg
+                    width="18"
+                    height="18"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="#c81e1e"
+                    stroke-width="1.8"
+                    aria-hidden="true"
+                  >
+                    <circle cx="12" cy="12" r="9" />
+                    <path d="M9 9l6 6M15 9l-6 6" /></svg
+                  >Amount doesn't match
+                </li>
+                <li style="display: flex; gap: 10px; align-items: center">
+                  <svg
+                    width="18"
+                    height="18"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="#0f7b4b"
+                    stroke-width="1.8"
+                    aria-hidden="true"
+                  >
+                    <circle cx="12" cy="12" r="9" />
+                    <path d="M8.5 12l2.5 2.5 4.5-5" /></svg
+                  >Payment reference matches
+                </li>
+              </ul>
+              <a class="btn ghost block" href="#" style="margin-top: 16px"
+                ><svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  aria-hidden="true"
+                >
+                  <path d="M14 4h6v6" />
+                  <path d="M20 4l-9 9" />
+                  <path
+                    d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"
+                  /></svg
+                >View on Stellar explorer</a
+              >
+            </section>
+
+            <section class="card" aria-labelledby="ac">
+              <h2 id="ac" style="margin-bottom: 12px">Activity</h2>
+              <ol
+                style="
+                  list-style: none;
+                  margin: 0;
+                  padding: 0;
+                  display: flex;
+                  flex-direction: column;
+                  gap: 14px;
+                  font-size: 14px;
+                "
+              >
+                <li style="display: flex; gap: 10px">
+                  <span class="dot r" style="margin-top: 6px"></span
+                  ><span
+                    >Flagged: amount doesn't match<br /><span
+                      class="small muted"
+                      >09 Oct 2026, 10:26 UTC</span
+                    ></span
+                  >
+                </li>
+                <li style="display: flex; gap: 10px">
+                  <span class="dot b" style="margin-top: 6px"></span
+                  ><span
+                    >Payment received from a wallet app<br /><span
+                      class="small muted"
+                      >09 Oct 2026, 10:26 UTC</span
+                    ></span
+                  >
+                </li>
+                <li style="display: flex; gap: 10px">
+                  <span class="dot n" style="margin-top: 6px"></span
+                  ><span
+                    >Link created<br /><span class="small muted"
+                      >09 Oct 2026, 10:24 UTC</span
+                    ></span
+                  >
+                </li>
+              </ol>
+            </section>
+          </div>
+        </div>
+      </main>
+    </div>
+    <script src="shell.js"></script>
+  </body>
+</html>

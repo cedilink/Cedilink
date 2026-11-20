@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Second-tranche screens · Cedilink</title>
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600&display=swap"
+    />
+    <link rel="stylesheet" href="styles.css" />
+    <style>
+      body {
+        background: #1f1f1f;
+        color: #eee;
+      }
+      .wrap {
+        padding: 40px 32px 80px;
+        display: flex;
+        flex-direction: column;
+        gap: 56px;
+      }
+      h1 {
+        font-size: 32px;
+        font-weight: 400;
+      }
+      .intro {
+        color: #bbb;
+        font-size: 14px;
+        margin-top: 8px;
+        max-width: 760px;
+        line-height: 1.6;
+      }
+      section h2 {
+        font-size: 20px;
+        font-weight: 500;
+      }
+      section p {
+        color: #bbb;
+        font-size: 14px;
+        margin-top: 6px;
+        max-width: 900px;
+        line-height: 1.5;
+      }
+      .pair {
+        display: flex;
+        gap: 32px;
+        align-items: flex-start;
+        margin-top: 16px;
+        flex-wrap: wrap;
+      }
+      .frame {
+        background: #fff;
+        border-radius: 10px;
+        overflow: hidden;
+        flex: none;
+      }
+      .desk {
+        width: 1080px;
+        height: 720px;
+      }
+      .desk iframe {
+        width: 1440px;
+        height: 960px;
+        transform: scale(0.75);
+        transform-origin: 0 0;
+        border: 0;
+      }
+      .phone {
+        width: 390px;
+        height: 844px;
+        border-radius: 28px;
+      }
+      .phone iframe {
+        width: 390px;
+        height: 844px;
+        border: 0;
+      }
+      .open {
+        color: #9fb0ff;
+        font-size: 13px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <div>
+        <h1>Cedilink · second-tranche screens</h1>
+        <p class="intro">
+          Screens the designer's files don't cover yet, drawn in their visual
+          language (Manrope, white cards, soft tinted pills, pill buttons,
+          #2330be). Each is shown at desktop (1440, scaled) and phone (390)
+          width. Open a screen on its own to click through.
+        </p>
+      </div>
+    </div>
+    <script>
+      var screens = [
+        [
+          "payment-details.html",
+          "Payment details · flagged",
+          "Payment details in the new sidebar: review banner with Accept as paid / Dismiss, expected vs received, incoming payments, verification, activity, Cancel link and Check a transaction.",
+        ],
+        [
+          "transaction-detail.html",
+          "Transaction detail",
+          "One incoming payment: checks against its request, every raw field, the linked request, and the resolve actions.",
+        ],
+        [
+          "check-transaction.html",
+          "Check a transaction",
+          "Merchant pastes a hash from the customer. Example result: payment sent to the wrong wallet (brief test 2).",
+        ],
+        [
+          "create-payment.html",
+          "Create payment link",
+          "New sidebar, asset select (USDC only for now) and the optional Customer reference field (CUS-101).",
+        ],
+        [
+          "reconciliation.html",
+          "Reconciliation · resolve actions",
+          "Unmatched tab with a selected flagged item, an optional note and Accept as paid / Dismiss. Adds a Resolved tab and an Unmatched pill for payments with no reference.",
+        ],
+        [
+          "accept-dialog.html",
+          "Accept as paid · confirm",
+          "Confirmation that says exactly what happens: status, receipt, and the extra amount staying in the merchant's wallet.",
+        ],
+        [
+          "reconciliation-resolved.html",
+          "Reconciliation · resolved",
+          "Success banner, the Resolved tab with decisions (Accepted as paid / Dismissed), who and when, and the record.",
+        ],
+        [
+          "notifications.html",
+          "Notifications panel",
+          "Bell popover over the Dashboard with the six notification types; unread rows tinted; deep links into Reconciliation.",
+        ],
+        [
+          "states.html",
+          "Empty, loading and error states",
+          "New merchant, wallet not set up, no links, no results, all clear, loading skeleton, load failure, live updates paused.",
+        ],
+        [
+          "reconciliation-mobile.html",
+          "Reconciliation · mobile sheet",
+          "On phones the flagged detail opens as a bottom sheet with the actions in thumb reach.",
+        ],
+        [
+          "checkout-mismatch.html",
+          "Checkout · payment doesn't match",
+          "Customer sent the wrong amount from a wallet app. Tells them not to pay again and that the merchant will follow up.",
+        ],
+        [
+          "checkout-cancelled.html",
+          "Checkout · link cancelled",
+          "Merchant cancelled the link. Customer hasn't been charged and is told not to send USDC.",
+        ],
+      ];
+      var wrap = document.querySelector(".wrap");
+      screens.forEach(function (s) {
+        var sec = document.createElement("section");
+        var mobileOnly = s[0].indexOf("mobile") !== -1;
+        sec.innerHTML =
+          "<h2>" +
+          s[1] +
+          ' <a class="open" href="' +
+          s[0] +
+          '">open ↗</a></h2><p>' +
+          s[2] +
+          '</p><div class="pair">' +
+          (mobileOnly
+            ? ""
+            : '<div class="frame desk"><iframe loading="lazy" title="' +
+              s[1] +
+              ', desktop" src="' +
+              s[0] +
+              '"></iframe></div>') +
+          '<div class="frame phone"><iframe loading="lazy" title="' +
+          s[1] +
+          ', phone" src="' +
+          s[0] +
+          '"></iframe></div></div>';
+        wrap.appendChild(sec);
+      });
+    </script>
+  </body>
+</html>

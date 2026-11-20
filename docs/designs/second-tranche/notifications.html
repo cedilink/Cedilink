@@ -1,0 +1,305 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Notifications · Cedilink</title>
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600&display=swap"
+    />
+    <link rel="stylesheet" href="styles.css" />
+    <style>
+      .stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 16px;
+      }
+      .stat {
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        padding: 18px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        font-size: 13px;
+        color: var(--heading);
+      }
+      .stat strong {
+        font-size: 30px;
+        font-weight: 400;
+        color: var(--ink);
+      }
+      .ra {
+        grid-template-columns: minmax(100px, 1fr) minmax(100px, 1fr) minmax(
+            120px,
+            1fr
+          );
+      }
+      .pop {
+        position: absolute;
+        top: 64px;
+        right: 24px;
+        width: min(400px, calc(100% - 32px));
+        background: #fff;
+        border: 1px solid var(--line);
+        border-radius: 20px;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.14);
+        z-index: 5;
+        display: flex;
+        flex-direction: column;
+      }
+      .pop header {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 18px 18px 10px;
+      }
+      .pop header h2 {
+        flex: 1;
+        font-size: 16px;
+        font-weight: 500;
+      }
+      .nt {
+        display: flex;
+        gap: 12px;
+        padding: 12px 18px;
+        text-decoration: none;
+        color: var(--ink);
+        font-size: 14px;
+        border-top: 1px solid #f3f3f3;
+      }
+      .nt:hover {
+        background: #fafafa;
+        color: var(--ink);
+      }
+      .nt .ic {
+        width: 34px;
+        height: 34px;
+        border-radius: 999px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex: none;
+      }
+      .nt.unread {
+        background: #f8f9ff;
+      }
+      .nt p + p {
+        margin-top: 2px;
+      }
+      @media (max-width: 600px) {
+        .pop {
+          right: 16px;
+          top: 60px;
+        }
+      }
+    </style>
+  </head>
+  <body data-active="dashboard" data-crumbs="Workspace|Dashboard">
+    <div class="app">
+      <main class="main" style="position: relative">
+        <div>
+          <h1 class="title">Dashboard</h1>
+          <p class="sub">Stellar Testnet · Merchant workspace</p>
+        </div>
+        <div class="stats">
+          <div class="stat">
+            Verified payments<strong>$2,450</strong>USDC · 32 transactions
+          </div>
+          <div class="stat">
+            Pending requests<strong>8</strong>Awaiting customer payment
+          </div>
+          <div class="stat">
+            Unmatched payments<strong>3</strong>Review in Reconciliation
+          </div>
+          <div class="stat">Payment links<strong>24</strong>Links created</div>
+        </div>
+        <div>
+          <h2 style="font-size: 20px; font-weight: 400">Recent activity</h2>
+          <p class="small" style="color: var(--brand); margin-top: 4px">
+            Latest requests and payment checks
+          </p>
+        </div>
+        <div class="rows">
+          <div class="thead ra">
+            <span>Request reference</span><span>Amount</span><span>Status</span>
+          </div>
+          <div class="trow ra">
+            <span>CDL-001</span><span>120 USDC</span
+            ><span><span class="pill ok">Confirmed</span></span>
+          </div>
+          <div class="trow ra">
+            <span>CDL-002</span><span>85 USDC</span
+            ><span><span class="pill pend">Pending</span></span>
+          </div>
+          <div class="trow ra">
+            <span>CDL-003</span><span>200 USDC</span
+            ><span><span class="pill flag">Flagged</span></span>
+          </div>
+        </div>
+
+        <section class="pop" role="dialog" aria-label="Notifications">
+          <header>
+            <h2>Notifications</h2>
+            <button
+              class="btn"
+              style="
+                min-height: 36px;
+                padding: 0 12px;
+                background: transparent;
+                color: var(--brand);
+                font-size: 13px;
+              "
+            >
+              Mark all as read
+            </button>
+          </header>
+          <a class="nt unread" href="reconciliation.html">
+            <span
+              class="ic"
+              style="background: var(--failed-tint); color: var(--failed)"
+              ><svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.8"
+                aria-hidden="true"
+              >
+                <circle cx="12" cy="12" r="9" />
+                <path d="M12 7.5v5M12 16h.01" /></svg
+            ></span>
+            <span style="flex: 1; min-width: 0"
+              ><p>Payment flagged · CDL-003</p>
+              <p class="small muted">
+                Received 100 USDC against 90 expected
+              </p></span
+            >
+            <span class="small muted">2m</span>
+          </a>
+          <a class="nt unread" href="reconciliation.html">
+            <span class="ic" style="background: #f1f1f1; color: var(--heading)"
+              ><svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.8"
+                aria-hidden="true"
+              >
+                <path d="M12 4v10M8 10l4 4 4-4" />
+                <path d="M5 19h14" /></svg
+            ></span>
+            <span style="flex: 1; min-width: 0"
+              ><p>Unmatched payment received</p>
+              <p class="small muted">40 USDC with no reference</p></span
+            >
+            <span class="small muted">18m</span>
+          </a>
+          <a class="nt" href="#">
+            <span
+              class="ic"
+              style="background: var(--paid-tint); color: var(--paid)"
+              ><svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.8"
+                aria-hidden="true"
+              >
+                <circle cx="12" cy="12" r="9" />
+                <path d="M8.5 12l2.5 2.5 4.5-5" /></svg
+            ></span>
+            <span style="flex: 1; min-width: 0"
+              ><p>Payment confirmed · CDL-004</p>
+              <p class="small muted">50 USDC verified on Stellar</p></span
+            >
+            <span class="small muted">1h</span>
+          </a>
+          <a class="nt" href="#">
+            <span
+              class="ic"
+              style="background: var(--paid-tint); color: var(--paid)"
+              ><svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.8"
+                aria-hidden="true"
+              >
+                <path d="M12 3l7 3v6c0 4-3 7-7 9-4-2-7-5-7-9V6z" />
+                <path d="M9 12l2 2 4-4" /></svg
+            ></span>
+            <span style="flex: 1; min-width: 0"
+              ><p>Payment verified · CDL-011</p>
+              <p class="small muted">
+                You accepted a flagged payment as paid
+              </p></span
+            >
+            <span class="small muted">3h</span>
+          </a>
+          <a class="nt" href="#">
+            <span
+              class="ic"
+              style="background: var(--line); color: var(--heading)"
+              ><svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.8"
+                aria-hidden="true"
+              >
+                <circle cx="12" cy="12" r="9" />
+                <path d="M12 7v5l3 2" /></svg
+            ></span>
+            <span style="flex: 1; min-width: 0"
+              ><p>Link expired · CDL-007</p>
+              <p class="small muted">No payment before the deadline</p></span
+            >
+            <span class="small muted">Yesterday</span>
+          </a>
+          <a class="nt" href="#">
+            <span
+              class="ic"
+              style="background: var(--brand-tint); color: var(--brand)"
+              ><svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.8"
+                aria-hidden="true"
+              >
+                <path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1" />
+                <path
+                  d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"
+                /></svg
+            ></span>
+            <span style="flex: 1; min-width: 0"
+              ><p>Payment link created · CDL-012</p>
+              <p class="small muted">75 USDC · Service booking</p></span
+            >
+            <span class="small muted">Yesterday</span>
+          </a>
+          <a
+            href="reconciliation.html"
+            class="btn tint"
+            style="margin: 12px 18px 18px"
+            >Open Reconciliation</a
+          >
+        </section>
+      </main>
+    </div>
+    <script src="shell.js"></script>
+  </body>
+</html>

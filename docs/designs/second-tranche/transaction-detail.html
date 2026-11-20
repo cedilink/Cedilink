@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Transaction detail · Cedilink</title>
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600&display=swap"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body
+    data-active="transactions"
+    data-crumbs="Workspace|Transaction history|7a2d54bf…c731e060"
+  >
+    <div class="app">
+      <main class="main">
+        <div class="phead">
+          <div>
+            <div
+              style="
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                flex-wrap: wrap;
+              "
+            >
+              <h1 class="title">100 USDC received</h1>
+              <span class="pill flag"
+                ><svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  aria-hidden="true"
+                >
+                  <circle cx="12" cy="12" r="9" />
+                  <path d="M12 7.5v5M12 16h.01" /></svg
+                >Flagged</span
+              >
+            </div>
+            <p class="sub">
+              For CDL-003 · 09 Oct 2026, 10:26 UTC · Stellar Testnet
+            </p>
+          </div>
+          <div class="actions">
+            <button class="btn tint">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.8"
+                aria-hidden="true"
+              >
+                <rect x="8" y="8" width="12" height="12" rx="2" />
+                <path
+                  d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"
+                /></svg
+              >Copy hash
+            </button>
+            <a class="btn tint" href="#"
+              ><svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.8"
+                aria-hidden="true"
+              >
+                <path d="M14 4h6v6" />
+                <path d="M20 4l-9 9" />
+                <path
+                  d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"
+                /></svg
+              >Stellar explorer</a
+            >
+          </div>
+        </div>
+
+        <div class="cols">
+          <div class="stack">
+            <section class="card" aria-labelledby="ck">
+              <h2 id="ck">Checks against CDL-003</h2>
+              <p class="small muted" style="margin: 4px 0 8px">
+                Received 100 USDC against 90 USDC expected.
+              </p>
+              <div class="check">
+                <b>Recipient</b><span>Matches receiving wallet G…XXXX</span
+                ><span class="dot g" role="img" aria-label="Passed"></span>
+              </div>
+              <div class="check">
+                <b>Asset</b><span>USDC matches USDC</span
+                ><span class="dot g" role="img" aria-label="Passed"></span>
+              </div>
+              <div class="check miss">
+                <b>Amount</b
+                ><span>90 expected · 100 received — overpaid by 10</span
+                ><span class="dot r" role="img" aria-label="Failed"></span>
+              </div>
+              <div class="check">
+                <b>Reference</b><span>CDL-003 matches request reference</span
+                ><span class="dot g" role="img" aria-label="Passed"></span>
+              </div>
+            </section>
+
+            <section class="card" aria-labelledby="rs">
+              <h2 id="rs">Resolution</h2>
+              <p
+                style="
+                  font-size: 14px;
+                  color: var(--heading);
+                  margin: 8px 0 16px;
+                "
+              >
+                Not resolved yet. Accepting marks CDL-003 as paid and emails the
+                customer a receipt. Dismissing leaves the request open; refund
+                the customer from your wallet.
+              </p>
+              <div class="actions">
+                <a class="btn pri" href="accept-dialog.html">Accept as paid</a>
+                <button class="btn ghost">Dismiss</button>
+              </div>
+            </section>
+          </div>
+
+          <div class="stack">
+            <section class="card" aria-labelledby="tf">
+              <h2 id="tf">Transfer</h2>
+              <dl class="kv">
+                <dt>Amount</dt>
+                <dd>100.0000000 USDC</dd>
+                <dt>Asset issuer</dt>
+                <dd>GBBD…FLA5</dd>
+                <dt>From</dt>
+                <dd>G…7K2Q</dd>
+                <dt>To</dt>
+                <dd>G…XXXX (your receiving wallet)</dd>
+                <dt>Memo</dt>
+                <dd>CDL-003</dd>
+                <dt>Transaction hash</dt>
+                <dd class="hash">7a2d54bf…c731e060</dd>
+                <dt>Operation ID</dt>
+                <dd>5517283746816001</dd>
+                <dt>Ledger</dt>
+                <dd>1,284,551</dd>
+                <dt>Ledger time</dt>
+                <dd>09 Oct 2026, 10:26:41 UTC</dd>
+                <dt>Network fee</dt>
+                <dd>0.00001 XLM</dd>
+                <dt>Seen by Cedilink</dt>
+                <dd>09 Oct 2026, 10:26:46 UTC</dd>
+              </dl>
+            </section>
+
+            <section class="card" aria-labelledby="lr">
+              <h2 id="lr">Linked request</h2>
+              <a
+                href="payment-details.html"
+                style="
+                  display: flex;
+                  align-items: center;
+                  gap: 12px;
+                  margin-top: 12px;
+                  padding: 14px;
+                  border: 1px solid var(--line);
+                  border-radius: 14px;
+                  text-decoration: none;
+                  color: var(--ink);
+                  flex-wrap: wrap;
+                "
+              >
+                <span style="flex: 1 1 180px; min-width: 0">
+                  <span style="display: block; font-size: 15px"
+                    >CDL-003 · Marketing package</span
+                  >
+                  <span
+                    class="small muted"
+                    style="display: block; margin-top: 2px"
+                    >90 USDC · Kofi Mensah · CUS-103</span
+                  >
+                </span>
+                <span class="pill flag">Flagged</span>
+              </a>
+            </section>
+          </div>
+        </div>
+      </main>
+    </div>
+    <script src="shell.js"></script>
+  </body>
+</html>

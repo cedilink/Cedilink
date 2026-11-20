@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Accept as paid · Cedilink</title>
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600&display=swap"
+    />
+    <link rel="stylesheet" href="styles.css" />
+    <style>
+      .rc {
+        grid-template-columns: minmax(90px, 1fr) minmax(140px, 1.5fr) minmax(
+            110px,
+            1.1fr
+          ) minmax(110px, 1.1fr) minmax(150px, 1.5fr) minmax(110px, 1fr);
+      }
+    </style>
+  </head>
+  <body data-active="reconciliation" data-crumbs="Workspace|Reconciliation">
+    <div class="app">
+      <main class="main" aria-hidden="true">
+        <div class="phead">
+          <div>
+            <h1 class="title">Reconciliation</h1>
+            <p class="sub">
+              Verify payments against your requests · Stellar Testnet
+            </p>
+          </div>
+          <div class="seg">
+            <span class="btn" style="background: #f1f1f1">Matched · 32</span
+            ><span class="btn pri">Unmatched · 3</span
+            ><span class="btn" style="background: #f1f1f1">Resolved · 4</span>
+          </div>
+        </div>
+        <div class="scrollx">
+          <div class="rows">
+            <div class="thead rc">
+              <span>Request</span><span>Expected vs Received</span
+              ><span>Asset</span><span>Recipient check</span><span>Tx hash</span
+              ><span>Status</span>
+            </div>
+            <div class="trow rc sel">
+              <span>CDL-003</span><span>90 → 100</span><span>USDC</span
+              ><span style="color: var(--paid)">Matches</span
+              ><span class="hash">7a2d54bf…c731e060</span
+              ><span><span class="pill flag">Flagged</span></span>
+            </div>
+            <div class="trow rc">
+              <span>CDL-005</span><span>75 XLM → 75 USDC</span
+              ><span class="bad" style="font-weight: 400">XLM → USDC</span
+              ><span style="color: var(--paid)">Matches</span
+              ><span class="hash">1e75cd42…903af8b1</span
+              ><span><span class="pill flag">Flagged</span></span>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <div class="scrim">
+      <div
+        class="dialog"
+        role="alertdialog"
+        aria-modal="true"
+        aria-labelledby="dt"
+        aria-describedby="dd"
+      >
+        <div class="dhead">
+          <h2 id="dt">Accept CDL-003 as paid?</h2>
+          <button
+            class="ibtn"
+            aria-label="Close"
+            style="margin: -10px -10px 0 0"
+          >
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+              aria-hidden="true"
+            >
+              <path d="M6 6l12 12M18 6L6 18" />
+            </svg>
+          </button>
+        </div>
+        <div class="co-box" style="background: #f7f7f7; padding: 16px">
+          <dl>
+            <dt>Expected</dt>
+            <dd>90 USDC</dd>
+            <dt>Received</dt>
+            <dd>100 USDC</dd>
+            <dt>Difference</dt>
+            <dd class="bad">+10 USDC</dd>
+          </dl>
+        </div>
+        <ul
+          id="dd"
+          style="
+            margin: 0;
+            padding-left: 18px;
+            font-size: 14px;
+            color: var(--heading);
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+          "
+        >
+          <li>
+            CDL-003 is marked
+            <strong style="font-weight: 500; color: var(--ink)"
+              >Confirmed</strong
+            >
+            and counts towards verified payments.
+          </li>
+          <li>Kofi Mensah gets a receipt at kofi@example.com.</li>
+          <li>
+            The extra 10 USDC stays in your wallet. Refund it yourself if you
+            need to.
+          </li>
+        </ul>
+        <p class="small muted">Note: "Customer added a 10 USDC tip"</p>
+        <div class="actions" style="justify-content: flex-end">
+          <button class="btn ghost">Cancel</button>
+          <a class="btn pri" href="reconciliation-resolved.html"
+            >Accept as paid</a
+          >
+        </div>
+      </div>
+    </div>
+    <script src="shell.js"></script>
+  </body>
+</html>

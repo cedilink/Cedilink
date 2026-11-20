@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Check a transaction · Cedilink</title>
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600&display=swap"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body data-active="links" data-crumbs="Workspace|Link management|CDL-009">
+    <div class="app">
+      <main class="main" aria-hidden="true">
+        <div class="phead">
+          <div>
+            <div
+              style="
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                flex-wrap: wrap;
+              "
+            >
+              <h1 class="title">Brand photography deposit</h1>
+              <span class="pill pend">Pending</span>
+            </div>
+            <p class="sub">CDL-009 · Order CD-2026-00131 · Stellar Testnet</p>
+          </div>
+          <div class="actions">
+            <span class="btn tint">Copy link</span>
+            <span class="btn tint">Check a transaction</span>
+            <span class="btn danger">Cancel link</span>
+          </div>
+        </div>
+        <div class="cols">
+          <section class="card">
+            <h2>Expected vs received</h2>
+            <p class="small muted" style="margin-top: 12px">
+              Nothing received yet. Expecting 25 USDC to G…XXXX with memo
+              CDL-009.
+            </p>
+          </section>
+          <section class="card">
+            <h2>Incoming payments</h2>
+            <p class="small muted" style="margin-top: 12px">
+              No payments have reached your wallet for this link.
+            </p>
+          </section>
+        </div>
+      </main>
+    </div>
+
+    <div class="scrim">
+      <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="dt">
+        <div class="dhead">
+          <h2 id="dt">Check a transaction</h2>
+          <button
+            class="ibtn"
+            aria-label="Close"
+            style="margin: -10px -10px 0 0"
+          >
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+              aria-hidden="true"
+            >
+              <path d="M6 6l12 12M18 6L6 18" />
+            </svg>
+          </button>
+        </div>
+        <p style="font-size: 14px; color: var(--heading)">
+          Customer says they paid? Paste the transaction hash from their wallet
+          and we'll check it against CDL-009.
+        </p>
+        <div class="field">
+          <label for="h">Transaction hash</label>
+          <input
+            id="h"
+            class="input"
+            value="c41e9a07…77d2b018"
+            spellcheck="false"
+          />
+        </div>
+
+        <div
+          style="
+            border: 1px solid #f6d5d5;
+            background: #fdf6f6;
+            border-radius: 16px;
+            padding: 14px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+          "
+        >
+          <p style="font-size: 15px; font-weight: 500; color: var(--failed)">
+            This payment went to a different wallet
+          </p>
+          <p style="font-size: 14px; color: var(--heading)">
+            25 USDC was sent to G…Q3VA, not your receiving wallet G…XXXX.
+            Cedilink can't recover it. Ask the customer to contact the owner of
+            that wallet.
+          </p>
+        </div>
+        <div>
+          <div class="check" style="border-top: 0">
+            <b>Recipient</b><span>G…Q3VA is not G…XXXX</span
+            ><span class="dot r" role="img" aria-label="Failed"></span>
+          </div>
+          <div class="check">
+            <b>Asset</b><span>USDC matches USDC</span
+            ><span class="dot g" role="img" aria-label="Passed"></span>
+          </div>
+          <div class="check">
+            <b>Amount</b><span>25 expected · 25 sent</span
+            ><span class="dot g" role="img" aria-label="Passed"></span>
+          </div>
+          <div class="check">
+            <b>Reference</b><span>CDL-009 matches</span
+            ><span class="dot g" role="img" aria-label="Passed"></span>
+          </div>
+        </div>
+        <p class="small muted">
+          The link stays open, so the customer can still pay to the right
+          wallet.
+        </p>
+        <div class="actions" style="justify-content: flex-end">
+          <a class="btn ghost" href="#">View on Stellar explorer</a>
+          <button class="btn dark">Done</button>
+        </div>
+      </div>
+    </div>
+    <script src="shell.js"></script>
+  </body>
+</html>
