@@ -35,11 +35,13 @@ const check = (label, ok, detail = "") => {
 const browser = await chromium.launch({ channel: "chrome" });
 const context = await browser.newContext({ viewport: { width: 1440, height: 900 }, deviceScaleFactor: 2 });
 await context.grantPermissions(["clipboard-read", "clipboard-write"]);
+
 const page = await context.newPage();
 const errors = [];
 page.on("pageerror", (error) => errors.push(error.message));
 // Expected refusals (401 before sign-in, 422 for the invalid wallets tried below) are not defects.
-page.on("console", (m) => m.type() === "error" && !/status of (401|422)/.test(m.text()) && errors.push(m.text()));
+// The instant-navigation check is a development-server diagnostic, not a defect in the page.
+page.on("console", (m) => m.type() === "error" && !/status of (401|422)|Could not validate that a segment/.test(m.text()) && errors.push(m.text()));
 
 const shot = (name, target = page) => target.screenshot({ path: `${SHOTS}${name}.png` });
 const sees = (text, timeout = 15_000, target = page) =>
@@ -68,13 +70,13 @@ await shot("d-00-login");
 await page.getByLabel("Password").fill(PASSWORD);
 await page.getByRole("button", { name: "Sign in" }).click();
 await page.waitForURL(/\/dashboard$/, { timeout: 15_000 }).catch(() => {});
-check("signs in and lands on the overview", (await sees("Total Received")) && (await sees("Ama Boateng")));
+check("signs in and lands on the dashboard", (await sees("Verified payments")) && (await sees("Ama Boateng")));
 
 console.log("\nEmpty workspace");
-check("overview shows zero totals", (await sees("No payments received yet")) && (await sees("Stellar Testnet connected")));
-await settle(); await shot("d-01-overview-empty");
-await page.getByRole("link", { name: "Payments", exact: false }).first().click();
-check("payments list shows the empty state", await sees("No payments yet"));
+check("dashboard shows an empty workspace", await sees("No activity yet"));
+await settle(); await shot("d-01-dashboard-empty");
+await page.getByRole("link", { name: "Link management" }).first().click();
+check("link management shows the empty state", await sees("No payment links yet"));
 await settle(); await shot("d-02-payments-empty");
 
 console.log("\nStellar USDC settings");
@@ -95,13 +97,13 @@ await page.getByRole("button", { name: "Save changes" }).click();
 check("a valid wallet is saved", await sees("Saved"));
 
 console.log("\nCreate a payment");
-await page.goto(`${FRONTEND}/dashboard/payments/new`);
+await page.goto(`${FRONTEND}/dashboard/links/new`);
 await page.getByLabel("Product or service").fill("Ghana Web3 Conference Ticket");
 await page.getByLabel("Amount").fill("25.00");
 await page.getByLabel("Customer name").fill("Kofi Mensah");
 await settle(300); await shot("d-04-create-payment");
-await page.getByRole("button", { name: "Generate checkout" }).click();
-check("shows the generated checkout", (await sees("Checkout created")) && (await sees("$25.00 USDC")));
+await page.getByRole("button", { name: "Generate payment link" }).click();
+check("shows the generated payment link", (await sees("Payment link created")) && (await sees("$25.00 USDC")));
 const link = await page.locator("text=/\\/c\\/SP-\\d+/").first().textContent();
 const paymentId = link.match(/SP-\d+/)[0];
 check("the link points at this frontend's checkout", link.startsWith(`${FRONTEND}/c/SP-`), link);
@@ -109,21 +111,21 @@ await page.getByRole("button", { name: "Copy link" }).click();
 check("copy link puts the link on the clipboard", (await page.evaluate(() => navigator.clipboard.readText())) === link);
 await settle(300); await shot("d-05-checkout-created");
 
-console.log("\nPayments list");
-await page.goto(`${FRONTEND}/dashboard/payments`);
-check("lists the new payment as awaiting", (await sees("Ghana Web3 Conference Ticket")) && (await sees("Awaiting payment")));
-await page.getByRole("tab", { name: /^Paid/ }).click();
-check("a tab with no payments explains itself", await sees("Nothing here"));
-check("the filter is kept in the URL", page.url().includes("status=paid"));
-await page.getByRole("tab", { name: /^All/ }).click();
-await page.getByLabel("Search payments or order ID").fill("Accra design summit");
+console.log("\nLink management");
+await page.goto(`${FRONTEND}/dashboard/links`);
+check("lists the new link as pending", (await sees("Ghana Web3 Conference Ticket")) && (await sees("Pending")));
+await page.getByRole("radio", { name: /^Confirmed/ }).click();
+check("a status with no links explains itself", await sees("Nothing here"));
+check("the filter is kept in the URL", page.url().includes("status=confirmed"));
+await page.getByRole("radio", { name: /^All/ }).click();
+await page.getByLabel("Search links or request reference").fill("Accra design summit");
 check("a search with no match says so", await sees("No results found"));
 await settle(300); await shot("d-06-no-results");
 await page.getByRole("button", { name: "Clear search" }).click();
 check("clearing the search brings the list back", await sees("Ghana Web3 Conference Ticket"));
 
 console.log("\nPayment details, then a live payment");
-await page.getByRole("link", { name: "Ghana Web3 Conference Ticket" }).first().click();
+await page.getByRole("link", { name: /Ghana Web3 Conference Ticket/ }).first().click();
 check("details show awaiting payment with nothing verified", (await sees("Waiting for the customer")) && (await sees("Not received yet")));
 await settle(); await shot("d-07-details-awaiting");
 const submitted = await pay(paymentId);
@@ -132,31 +134,33 @@ check("details turn Paid without a reload", await sees("This payment has been ve
 check("the success toast appears", await sees("Payment successful", 10_000));
 await settle(1200); await shot("d-08-details-paid-with-toast");
 check("the explorer link is offered", (await page.getByRole("link", { name: "View on Stellar explorer" }).getAttribute("href"))?.includes("/tx/") ?? false);
-await page.getByRole("link", { name: "Overview" }).click();
-check("overview now counts the payment", await sees("$25.00"));
-await settle(1500); await shot("d-09-overview");
-await page.getByRole("link", { name: /^Payments/ }).first().click();
+await page.getByRole("link", { name: "Dashboard", exact: true }).click();
+check("the dashboard now counts the payment", await sees("$25.00"));
+await settle(1500); await shot("d-09-dashboard");
+await page.getByRole("link", { name: "Link management" }).first().click();
 await sees("Ghana Web3 Conference Ticket");
-await settle(); await shot("d-10-payments-list");
+await settle(); await shot("d-10-links");
 
 console.log("\nMobile");
 const phone = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, hasTouch: true, storageState: await context.storageState() });
 const m = await phone.newPage();
 await m.goto(`${FRONTEND}/dashboard`, { waitUntil: "networkidle" });
-check("overview fits a phone", (await sees("Total Received", 15_000, m)) && !(await m.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth)));
-await m.waitForTimeout(1200); await shot("m-d-01-overview", m);
+check("the dashboard fits a phone", (await sees("Verified payments", 15_000, m)) && !(await m.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth)));
+await m.waitForTimeout(1200); await shot("m-d-01-dashboard", m);
 await m.getByRole("button", { name: "Open menu" }).click();
 check("the menu opens as a drawer", await m.getByRole("button", { name: "Close menu" }).waitFor({ timeout: 5_000 }).then(() => true, () => false));
 await m.waitForTimeout(600); await shot("m-d-02-drawer", m);
-await m.getByRole("link", { name: /^Payments/ }).click();
-check("payments show as cards", (await m.getByRole("link", { name: /Ghana Web3 Conference Ticket/ }).first().waitFor({ timeout: 15_000 }).then(() => true, () => false)) && !(await m.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth)));
-await m.waitForTimeout(800); await shot("m-d-03-payments", m);
+await m.getByRole("link", { name: "Link management" }).click();
+check("links show as cards", (await m.getByRole("link", { name: /Ghana Web3 Conference Ticket/ }).first().waitFor({ timeout: 15_000 }).then(() => true, () => false)) && !(await m.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth)));
+await m.waitForTimeout(800); await shot("m-d-03-links", m);
 await m.getByRole("link", { name: /Ghana Web3 Conference Ticket/ }).first().click();
 await sees("Payment information", 15_000, m);
 check("details fit a phone", !(await m.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth)));
 await m.waitForTimeout(800); await m.screenshot({ path: `${SHOTS}m-d-04-details.png`, fullPage: true });
 
 console.log("\nSign out");
+// The development server's overlay badge can sit over the account menu; it is not part of the app.
+await page.evaluate(() => document.querySelectorAll("nextjs-portal").forEach((node) => node.remove()));
 await page.getByRole("button", { name: /Ama Boateng/ }).click();
 await page.getByRole("button", { name: "Sign out" }).click();
 await page.waitForURL(/\/login/, { timeout: 15_000 }).catch(() => {});

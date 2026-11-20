@@ -148,7 +148,7 @@ console.log("\nHappy path (desktop)");
   await page.getByRole("button", { name: /^Pay \$25 USDC$/ }).click();
   check("06 shows processing steps", await sees(page, "Processing payment"));
   await settle(page); await shot(page, "06-processing");
-  check("07 reaches success only after verification", await sees(page, "Payment successful", 60_000));
+  check("07 reaches success only after verification", await sees(page, "Payment confirmed", 60_000));
   await page.waitForTimeout(1600); await shot(page, "07-success");
   check("07 links to the transaction", (await page.getByRole("link", { name: "View Transaction" }).getAttribute("href"))?.includes("stellar.expert/explorer/testnet/tx/") ?? false);
   const paid = await merchant("GET", `/payments/${id}`);
@@ -211,7 +211,7 @@ console.log("\nMobile");
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth);
   check("no horizontal scroll", !overflow);
   await page.getByRole("button", { name: /^Pay \$12\.50 USDC$/ }).click();
-  check("07 success on mobile", await sees(page, "Payment successful", 60_000));
+  check("07 success on mobile", await sees(page, "Payment confirmed", 60_000));
   await page.waitForTimeout(1600); await shot(page, "m-07-success");
   check("no browser errors", errors.length === 0, errors.join(" | "));
   await close();
@@ -248,7 +248,7 @@ console.log("\nWallet prompt: cancel, decline, disconnect");
   await page.getByRole("button", { name: "Reconnect wallet" }).click();
   check("15 reconnecting returns to review", await sees(page, "Available balance"));
   await page.getByRole("button", { name: /^Pay \$4 USDC$/ }).click();
-  check("the payment still completes afterwards", await sees(page, "Payment successful", 60_000));
+  check("the payment still completes afterwards", await sees(page, "Payment confirmed", 60_000));
   check("no browser errors", errors.length === 0, errors.join(" | "));
   await close();
 }
@@ -312,7 +312,7 @@ console.log("\nA Testnet wallet that has not added this USDC");
   check("12 Get test USDC leads straight to the review screen", await sees(page, "Available balance", 60_000));
   check("the wallet now holds exactly what the payment needs", await sees(page, "2.00 USDC"));
   await page.getByRole("button", { name: /^Pay \$2 USDC$/ }).click();
-  check("and the payment succeeds", await sees(page, "Payment successful", 60_000));
+  check("and the payment succeeds", await sees(page, "Payment confirmed", 60_000));
   await close();
 
   // A wallet whose account does not exist on Testnet at all, as with a fresh Albedo account.
@@ -324,7 +324,7 @@ console.log("\nA Testnet wallet that has not added this USDC");
   await page.getByRole("button", { name: "Get test USDC" }).click();
   check("12 Get test USDC creates and funds the account", await sees(page, "Available balance", 90_000));
   await page.getByRole("button", { name: /^Pay \$3 USDC$/ }).click();
-  check("and that payment succeeds too", await sees(page, "Payment successful", 60_000));
+  check("and that payment succeeds too", await sees(page, "Payment confirmed", 60_000));
   await settle(page); await shot(page, "12-missing-trustline");
   await close();
 }
@@ -353,7 +353,7 @@ console.log("\nA transaction that fails on Stellar, then a retry");
   await page.getByRole("button", { name: "Try again" }).click();
   check("10 try again returns to review", await sees(page, "Available balance"));
   await page.getByRole("button", { name: /^Pay \$6 USDC$/ }).click();
-  check("the retry succeeds", await sees(page, "Payment successful", 60_000));
+  check("the retry succeeds", await sees(page, "Payment confirmed", 60_000));
   check("the backend marks the retried payment paid", (await merchant("GET", `/payments/${id}`)).status === "PAID");
   check("no browser errors", errors.length === 0, errors.join(" | "));
   await close();
@@ -387,7 +387,7 @@ console.log("\nPaying from a wallet app (the route for phones)");
   await page.waitForTimeout(12_000);
   check("an underpayment does not complete the checkout", (await sees(page, "Waiting for your payment", 2_000)) && (await merchant("GET", `/payments/${id}`)).status === "AWAITING_PAYMENT");
   await fromWallet(request.amount);
-  check("the exact payment turns the page to success", await sees(page, "Payment successful", 60_000));
+  check("the exact payment turns the page to success", await sees(page, "Payment confirmed", 60_000));
   await page.waitForTimeout(1600); await shot(page, "m-17-wallet-app-success");
   const paid = await merchant("GET", `/payments/${id}`);
   check("the backend verified it and recorded the paying wallet", paid.status === "PAID" && paid.customerWallet === customer.publicKey());
@@ -410,7 +410,7 @@ console.log("\nReloading while the payment is confirming");
   check("11 a reload mid-payment does not restart the checkout", landed !== "other", landed);
   if (landed === "pending") {
     await settle(page); await shot(page, "11-payment-pending");
-    check("11 pending turns into success on its own", await sees(page, "Payment successful", 60_000));
+    check("11 pending turns into success on its own", await sees(page, "Payment confirmed", 60_000));
   }
   await close();
 }

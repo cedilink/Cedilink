@@ -83,7 +83,7 @@ console.log("\nSign up with a wallet created for the merchant");
   check("explains the wait while the wallet is set up", await sees(page, "Setting up your wallet on Stellar"));
   await page.waitForURL(/\/dashboard$/, { timeout: 60_000 }).catch(() => {});
   check("lands on the dashboard, signed in", page.url().endsWith("/dashboard") && (await sees(page, "Kofi Mensah")));
-  check("Stellar USDC is already connected", await sees(page, "Stellar Testnet connected"));
+  check("Stellar USDC is already connected", (await sees(page, "Verified payments")) && !(await sees(page, "Add a receiving wallet", 2_000)));
 
   await page.getByRole("link", { name: "Stellar USDC" }).click();
   check("settings show the wallet was created for them", await sees(page, "Created and funded for you"));
@@ -91,11 +91,11 @@ console.log("\nSign up with a wallet created for the merchant");
   check("the wallet is a new one", /^G[A-Z2-7]{55}$/.test(wallet) && wallet !== process.env.MERCHANT_PUBLIC_KEY, wallet);
   await page.waitForTimeout(400); await shot(page, "s-02-managed-settings");
 
-  await page.goto(`${FRONTEND}/dashboard/payments/new`);
+  await page.goto(`${FRONTEND}/dashboard/links/new`);
   await page.getByLabel("Product or service").fill("Logo design deposit");
   await page.getByLabel("Amount").fill("6.00");
-  await page.getByRole("button", { name: "Generate checkout" }).click();
-  check("creates a first payment straight away", await sees(page, "Checkout created"));
+  await page.getByRole("button", { name: "Generate payment link" }).click();
+  check("creates a first payment link straight away", await sees(page, "Payment link created"));
   const link = await page.locator("text=/\\/c\\/SP-\\d+/").first().textContent();
 
   // The customer, in the same browser, opens the link and pays.
