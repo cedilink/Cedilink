@@ -9,7 +9,14 @@ const SCALLOP =
  * The scalloped status badge from the designs. With `animated`, the circle springs in,
  * the outline draws itself, then the mark inside is drawn.
  */
-export function Badge({ tone, animated = false }: { tone: "success" | "alert"; animated?: boolean }) {
+const TONES = {
+  success: "bg-paid-tint text-paid",
+  alert: "bg-failed-tint text-failed",
+  warning: "bg-awaiting-tint text-awaiting",
+  neutral: "bg-line text-heading",
+} as const;
+
+export function Badge({ tone, animated = false }: { tone: keyof typeof TONES; animated?: boolean }) {
   const still = useReducedMotion();
   const play = animated && !still;
   const draw = (delay: number, duration: number) =>
@@ -19,7 +26,7 @@ export function Badge({ tone, animated = false }: { tone: "success" | "alert"; a
 
   return (
     <motion.div
-      className={`grid size-[72px] place-items-center rounded-full ${tone === "success" ? "bg-paid-tint text-paid" : "bg-surface text-ink"}`}
+      className={`grid size-[72px] place-items-center rounded-full ${TONES[tone]}`}
       initial={play ? { scale: 0 } : false}
       animate={{ scale: 1 }}
       transition={{ type: "spring", stiffness: 260, damping: 16 }}
@@ -28,6 +35,8 @@ export function Badge({ tone, animated = false }: { tone: "success" | "alert"; a
         <motion.path d={SCALLOP} {...draw(0.15, 0.7)} />
         {tone === "success" ? (
           <motion.path d="m9 12 2 2 4-4" {...draw(0.75, 0.3)} />
+        ) : tone === "neutral" ? (
+          <path d="m9 9 6 6" />
         ) : (
           <>
             <path d="M12 8v4" />

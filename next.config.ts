@@ -35,6 +35,14 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+  async redirects() {
+    // Payments became payment links in the second tranche. Links in emails already sent keep working.
+    return [
+      { source: "/dashboard/payments", destination: "/dashboard/links", permanent: true },
+      { source: "/dashboard/payments/new", destination: "/dashboard/links/new", permanent: true },
+      { source: "/dashboard/payments/:paymentId", destination: "/dashboard/links/:paymentId", permanent: true },
+    ];
+  },
   async rewrites() {
     return [{ source: "/api/:path*", destination: `${apiUrl}/v1/:path*` }];
   },

@@ -109,3 +109,30 @@ describe("checkout machine", () => {
     expect(run(open, { type: "WALLET_REJECTED" }).lastWalletId).toBe("freighter");
   });
 });
+
+describe("second tranche: cancelled links and payments that do not match", () => {
+  const mismatch = { state: "flagged" as const, reason: "UNDERPAID" as const, message: "Less", received: { amount: "20.00", asset: "USDC" }, resolved: false, receivedAt: "2026-11-20T10:00:00Z" };
+
+  it("opens a cancelled link on the cancelled screen", () => {
+    expect(initialState({ status: "CANCELLED", transactionHash: null, paidAt: null }).screen).toBe("cancelled");
+  });
+
+  it("explains a mismatched payment on load instead of asking for payment again", () => {
+    expect(initialState({ status: "AWAITING_PAYMENT", transactionHash: null, paidAt: null, lastTransfer: mismatch }).screen).toBe("mismatch");
+    expect(initialState({ status: "AWAITING_PAYMENT", transactionHash: null, paidAt: null, lastTransfer: { ...mismatch, resolved: true } }).screen).toBe("selectMethod");
+  });
+
+  it("switches to the mismatch screen when one arrives while waiting", () => {
+    const waiting = initialState({ status: "AWAITING_PAYMENT", transactionHash: null, paidAt: null });
+    const next = reduce({ ...waiting, screen: "walletApp", external: true }, { type: "STATUS", status: "AWAITING_PAYMENT", transactionHash: null, lastTransfer: mismatch });
+    expect(next.screen).toBe("mismatch");
+    // The same report again changes nothing.
+    expect(reduce({ ...next, screen: "summary" }, { type: "STATUS", status: "AWAITING_PAYMENT", transactionHash: null, lastTransfer: mismatch }).screen).toBe("summary");
+  });
+
+  it("moves to the cancelled screen when the merchant cancels", () => {
+    const waiting = initialState({ status: "AWAITING_PAYMENT", transactionHash: null, paidAt: null });
+    expect(reduce(waiting, { type: "STATUS", status: "CANCELLED", transactionHash: null }).screen).toBe("cancelled");
+    expect(reduce(waiting, { type: "PROBLEM", code: "PAYMENT_CANCELLED" }).screen).toBe("cancelled");
+  });
+});

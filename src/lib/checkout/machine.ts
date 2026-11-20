@@ -1,4 +1,4 @@
-import type { Checkout, PaymentStatus, Preflight } from "@/lib/api/client";
+import type { Checkout, CheckoutTransfer, PaymentStatus, Preflight } from "@/lib/api/client";
 import type { WalletId } from "@/lib/wallets";
 
 // Each screen corresponds to one design in ui-assets/customer-ui.
@@ -19,7 +19,9 @@ export type Screen =
   | "walletDisconnected" // 15
   | "connectionRejected" // 16
   | "walletNotInstalled" // 16
-  | "walletApp"; // paying from a wallet app, e.g. on a phone; not in the numbered designs
+  | "walletApp" // paying from a wallet app, e.g. on a phone; not in the numbered designs
+  | "cancelled" // the merchant cancelled the link (second tranche)
+  | "mismatch"; // a payment arrived that does not match the request (second tranche)
 
 export interface CheckoutState {
   screen: Screen;
@@ -41,6 +43,8 @@ export interface CheckoutState {
   toppingUp: boolean;
   /** Code of the last problem, so a screen shared by several causes can say which one it was. */
   problemCode: string | null;
+  /** The latest payment received for this request that did not match it, if any. */
+  lastTransfer: CheckoutTransfer | null;
 }
 
 export type CheckoutEvent =
@@ -58,7 +62,14 @@ export type CheckoutEvent =
   | { type: "PAY_STARTED" }
   | { type: "SIGN_CANCELLED" }
   | { type: "SUBMITTED"; status: PaymentStatus; transactionHash: string | null }
-  | { type: "STATUS"; status: PaymentStatus; transactionHash: string | null; paidAt?: string | null }
+  | {
+      type: "STATUS";
+      status: PaymentStatus;
+      transactionHash: string | null;
+      paidAt?: string | null;
+      /** Undefined when the update does not say (live events); null when there is none. */
+      lastTransfer?: CheckoutTransfer | null;
+    }
   | { type: "PROBLEM"; code: string; preflight?: Preflight }
   | { type: "STILL_PENDING" }
   | { type: "TOP_UP"; running: boolean };
@@ -80,6 +91,8 @@ export function screenForProblem(code: string): Screen {
       return "expired";
     case "ALREADY_PAID":
       return "alreadyPaid";
+    case "PAYMENT_CANCELLED":
+      return "cancelled";
     case "PAYMENT_IN_PROGRESS":
       return "pending";
     default:
@@ -87,7 +100,13 @@ export function screenForProblem(code: string): Screen {
   }
 }
 
-export function initialState(checkout: Pick<Checkout, "status" | "transactionHash" | "paidAt">): CheckoutState {
+/** A mismatched payment the customer should hear about: one the merchant has not settled yet. */
+export const shouldExplain = (status: PaymentStatus, t: CheckoutTransfer | null | undefined) =>
+  Boolean(t && !t.resolved && status !== "PAID" && status !== "CANCELLED");
+
+export function initialState(
+  checkout: Pick<Checkout, "status" | "transactionHash" | "paidAt"> & { lastTransfer?: CheckoutTransfer | null },
+): CheckoutState {
   const base: CheckoutState = {
     screen: "selectMethod",
     walletPickerOpen: false,
@@ -102,9 +121,12 @@ export function initialState(checkout: Pick<Checkout, "status" | "transactionHas
     connecting: false,
     problemCode: null,
     toppingUp: false,
+    lastTransfer: checkout.lastTransfer ?? null,
   };
   // Opening or reloading the link lands on the screen that matches the payment's real state.
   if (checkout.status === "PAID") return { ...base, screen: "alreadyPaid" };
+  if (checkout.status === "CANCELLED") return { ...base, screen: "cancelled" };
+  if (shouldExplain(checkout.status, checkout.lastTransfer)) return { ...base, screen: "mismatch" };
   if (checkout.status === "EXPIRED") return { ...base, screen: "expired" };
   if (checkout.status === "FAILED") return { ...base, screen: "failed" };
   if (base.submitted) return { ...base, screen: "pending" };
@@ -170,12 +192,17 @@ export function reduce(state: CheckoutState, event: CheckoutEvent): CheckoutStat
         status: event.status,
         transactionHash: event.transactionHash ?? state.transactionHash,
         paidAt: event.paidAt ?? state.paidAt,
+        lastTransfer: event.lastTransfer === undefined ? state.lastTransfer : event.lastTransfer,
       };
       // The backend's verdict is the only route to the success screen.
       // A payment this customer made (here, or from their wallet app) is a success; one that
       // simply turned out to be paid already is reported as such.
       if (event.status === "PAID") return { ...next, screen: state.submitted || state.external ? "success" : "alreadyPaid", walletPickerOpen: false };
       if (event.status === "EXPIRED") return { ...next, screen: "expired", walletPickerOpen: false };
+      if (event.status === "CANCELLED") return { ...next, screen: "cancelled", walletPickerOpen: false };
+      // A new mismatched payment arrived (for example from a wallet app): say so rather than keep waiting.
+      const fresh = event.lastTransfer && event.lastTransfer.receivedAt !== state.lastTransfer?.receivedAt;
+      if (fresh && shouldExplain(event.status, event.lastTransfer)) return { ...next, screen: "mismatch", walletPickerOpen: false };
       if (event.status === "FAILED") return state.submitted ? { ...next, screen: "failed", submitted: false } : next;
       if (IN_FLIGHT.includes(event.status) && !state.submitted) return { ...next, screen: "pending", submitted: true };
       return next;

@@ -53,18 +53,18 @@ export default function manifest(): MetadataRoute.Manifest {
     ],
     shortcuts: [
       {
-        name: "Create payment",
-        short_name: "New payment",
-        description: "Create a payment and get its checkout link",
-        url: "/dashboard/payments/new?source=pwa-shortcut",
+        name: "Create payment link",
+        short_name: "New link",
+        description: "Create a payment link for a customer",
+        url: "/dashboard/links/new?source=pwa-shortcut",
         icons: [
           { src: "/icons/icon-96.png", sizes: "96x96", type: "image/png" },
         ],
       },
       {
-        name: "Payments",
-        description: "See where every payment stands",
-        url: "/dashboard/payments?source=pwa-shortcut",
+        name: "Reconciliation",
+        description: "Review payments that need your attention",
+        url: "/dashboard/reconciliation?source=pwa-shortcut",
         icons: [
           { src: "/icons/icon-96.png", sizes: "96x96", type: "image/png" },
         ],

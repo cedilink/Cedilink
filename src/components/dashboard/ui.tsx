@@ -5,25 +5,30 @@ import type { ComponentProps, ReactNode } from "react";
 import { Badge, Spinner } from "../motion/badge";
 import { Button } from "../ui/button";
 
-export function PageHeader({ title, children }: { title: string; children?: ReactNode }) {
+export function PageHeader({ title, subtitle, children }: { title: ReactNode; subtitle?: ReactNode; children?: ReactNode }) {
   return (
-    <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
-      <h1 className="text-2xl tracking-tight text-ink">{title}</h1>
-      {children ? <div className="flex items-center gap-2">{children}</div> : null}
+    <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
+      <div className="min-w-0">
+        <h1 className="text-[28px] leading-tight tracking-tight text-ink">{title}</h1>
+        {subtitle ? <p className="mt-1 text-sm text-brand">{subtitle}</p> : null}
+      </div>
+      {children ? <div className="flex flex-wrap items-center gap-2">{children}</div> : null}
     </div>
   );
 }
 
 export function Card({ className = "", ...props }: ComponentProps<"div">) {
-  return <div className={`rounded-2xl bg-white ${className}`} {...props} />;
+  return <div className={`rounded-2xl border border-line bg-white ${className}`} {...props} />;
 }
 
 const pill =
   "inline-flex h-10 items-center justify-center gap-2 rounded-full px-4 text-sm font-medium transition-[background-color,transform] duration-200 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50";
 const pillVariants = {
   brand: "bg-brand text-white hover:bg-brand-hover",
-  white: "bg-white text-ink hover:bg-line",
+  white: "border border-line bg-white text-ink hover:bg-surface",
   soft: "bg-surface text-ink hover:bg-line",
+  tint: "bg-brand-tint text-brand hover:bg-brand-wash",
+  danger: "border border-failed/25 bg-white text-failed hover:bg-failed-tint/50",
 } as const;
 
 export function PillButton({ variant = "brand", className = "", ...props }: { variant?: keyof typeof pillVariants } & ComponentProps<"button">) {
@@ -77,6 +82,33 @@ export function Toggle({ checked, onChange, label, disabled }: { checked: boolea
     >
       <span className={`absolute top-1 size-4 rounded-full bg-white transition-[left] ${checked ? "left-6" : "left-1"}`} />
     </button>
+  );
+}
+
+/** Shown when a list has nothing to show. */
+export function Empty({ title, message, art, children }: { title: string; message: string; art?: ReactNode; children?: ReactNode }) {
+  return (
+    <div className="flex flex-col items-center rounded-2xl border border-dashed border-line px-6 py-14 text-center">
+      {art}
+      <h2 className={`${art ? "mt-4" : ""} text-lg text-ink`}>{title}</h2>
+      <p className="mt-1 max-w-sm text-sm text-heading">{message}</p>
+      {children ? <div className="mt-5 flex flex-wrap justify-center gap-2">{children}</div> : null}
+    </div>
+  );
+}
+
+/** Placeholder rows while a list loads. */
+export function SkeletonRows({ rows = 3, label = "Loading" }: { rows?: number; label?: string }) {
+  return (
+    <div className="flex flex-col gap-3" role="status" aria-label={label}>
+      {Array.from({ length: rows }, (_, i) => (
+        <div key={i} className="flex h-20 items-center gap-4 rounded-2xl border border-line px-5" aria-hidden>
+          <span className="h-3.5 w-24 animate-pulse rounded-full bg-surface motion-reduce:animate-none" />
+          <span className="h-3.5 w-20 animate-pulse rounded-full bg-surface motion-reduce:animate-none" />
+          <span className="ml-auto h-7 w-24 animate-pulse rounded-full bg-surface motion-reduce:animate-none" />
+        </div>
+      ))}
+    </div>
   );
 }
 

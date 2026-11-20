@@ -12,6 +12,14 @@ export type StellarSettings = Schemas["StellarSettings"];
 export type Merchant = Schemas["Merchant"];
 export type Account = Schemas["Account"];
 export type Notifications = Schemas["Notifications"];
+export type DisplayStatus = Schemas["DisplayStatus"];
+export type Transfer = Schemas["Transfer"];
+export type TransactionRow = Schemas["TransactionRow"];
+export type TransactionList = Schemas["TransactionList"];
+export type Reconciliation = Schemas["Reconciliation"];
+export type Notification = Schemas["Notification"];
+export type NotificationList = Schemas["NotificationList"];
+export type CheckoutTransfer = Schemas["CheckoutTransfer"];
 
 /** An error answered by the API, carrying its machine-readable code. */
 export class ApiError extends Error {

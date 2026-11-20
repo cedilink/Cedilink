@@ -96,7 +96,7 @@ export function SelectMethod({ checkout, controller }: Props) {
               role="radio"
               aria-checked={method.available}
               aria-disabled={!method.available}
-              className={`flex items-center gap-3 rounded-2xl bg-white p-3 ${method.available ? "" : "opacity-55"}`}
+              className={`flex items-center gap-3 rounded-2xl bg-surface p-3 ${method.available ? "" : "opacity-55"}`}
             >
               <Image
                 src={art.src}
@@ -201,7 +201,7 @@ export function Review({ checkout, controller }: Props) {
 // ── 05 ──────────────────────────────────────────────────────────────────────────
 
 const SpinnerIcon = () => (
-  <div className="grid size-[72px] place-items-center rounded-full bg-surface text-ink">
+  <div className="grid size-[72px] place-items-center rounded-full bg-white text-ink">
     <Spinner />
   </div>
 );
@@ -298,7 +298,7 @@ export function Processing({ checkout, controller }: Props) {
     <StatusScreen icon={<SpinnerIcon />} title="Processing payment…">
       <PaymentLine checkout={checkout} />
       <ol
-        className="flex flex-col gap-4 rounded-2xl bg-surface p-4"
+        className="flex flex-col gap-4 rounded-2xl bg-white p-4"
         aria-live="polite"
       >
         <Step label="Payment initiated" state="done" />
@@ -361,8 +361,8 @@ export function Success({ checkout, controller }: Props) {
   return (
     <StatusScreen
       icon={<Badge tone="success" animated />}
-      title="Payment successful"
-      message={`Your payment to ${checkout.merchant.name} has been confirmed on Stellar.`}
+      title="Payment confirmed"
+      message={`Your payment to ${checkout.merchant.name} has been confirmed on ${checkout.network.label}.`}
       actions={
         <>
           {transactionHash ? (
@@ -805,4 +805,56 @@ function explorerLink(checkout: Checkout, hash: string): string {
   if (checkout.explorerUrl && checkout.transactionHash === hash)
     return checkout.explorerUrl;
   return `https://stellar.expert/explorer/${checkout.network.id}/tx/${hash}`;
+}
+
+// ── Second tranche ───────────────────────────────────────────────────────────────
+
+export function Cancelled({ checkout }: Props) {
+  return (
+    <StatusScreen
+      icon={<Badge tone="neutral" />}
+      title="Payment link cancelled"
+      message={`${checkout.merchant.name} cancelled this payment request. You haven't been charged.`}
+      actions={<ReturnToMerchant checkout={checkout} variant="ink" />}
+    >
+      <Panel>
+        <Row label="Product">{checkout.productName}</Row>
+        <Row label="Order ID">{checkout.orderId}</Row>
+        <Row label="Payment ID">{checkout.paymentId}</Row>
+      </Panel>
+      <Note>Don&apos;t send USDC to this request. Ask the merchant for a new payment link.</Note>
+    </StatusScreen>
+  );
+}
+
+/**
+ * A payment arrived from the customer's wallet that does not match the request (wrong
+ * amount, asset, or too late). Tells them not to pay again and that the merchant knows.
+ */
+export function Mismatch({ checkout, controller }: Props) {
+  const t = controller.state.lastTransfer;
+  return (
+    <StatusScreen
+      icon={<Badge tone="warning" />}
+      title="Payment received, but it doesn't match"
+      message={t ? `${t.message} We received ${t.received.amount} ${t.received.asset}.` : "The payment received does not match this request."}
+      actions={<ReturnToMerchant checkout={checkout} variant="ink" />}
+    >
+      {t ? (
+        <Panel>
+          <Row label="Required">
+            {checkout.amount} {checkout.asset}
+          </Row>
+          <Row label="Received">
+            <span className="text-failed">
+              {t.received.amount} {t.received.asset}
+            </span>
+          </Row>
+          <Row label="Order ID">{checkout.orderId}</Row>
+          <Row label="Received at">{formatDateTime(t.receivedAt)}</Row>
+        </Panel>
+      ) : null}
+      <Note>Don&apos;t send another payment. {checkout.merchant.name} has been notified and will contact you to settle the difference or refund you.</Note>
+    </StatusScreen>
+  );
 }

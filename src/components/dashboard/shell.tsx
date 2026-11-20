@@ -10,6 +10,7 @@ import {
   CircleHelp,
   CreditCard,
   LayoutGrid,
+  ListChecks,
   LogOut,
   Menu,
   Search,
@@ -23,19 +24,26 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { Suspense, useEffect, useRef, useState, type ReactNode } from "react";
 import { api, ApiError } from "@/lib/api/client";
-import { useMerchant, usePayments } from "@/lib/dashboard/queries";
+import { looksLikeHash } from "@/lib/dashboard/filters";
+import { useMerchant, useOverview } from "@/lib/dashboard/queries";
 import { Mascot } from "../motion/mascot";
 import { InstallButton } from "../pwa/install-button";
+import { FeedbackButton } from "./feedback";
+import { NotificationsBell } from "./notifications";
 import { LiveUpdates } from "./toasts";
 import { Loading } from "./ui";
 
 const TITLES: [prefix: string, title: string][] = [
-  ["/dashboard/payments/new", "Create payment"],
-  ["/dashboard/payments/", "Payment details"],
-  ["/dashboard/payments", "Payments"],
+  ["/dashboard/links/new", "Create payment link"],
+  ["/dashboard/links/", "Payment details"],
+  ["/dashboard/links", "Link management"],
+  ["/dashboard/transactions/", "Transaction details"],
+  ["/dashboard/transactions", "Transaction history"],
+  ["/dashboard/reconciliation", "Reconciliation"],
+  ["/dashboard/notifications", "Notifications"],
   ["/dashboard/payment-methods/stellar-usdc", "Stellar USDC"],
   ["/dashboard/settings", "Settings"],
-  ["/dashboard", "Overview"],
+  ["/dashboard", "Dashboard"],
 ];
 
 function NavItem({
@@ -43,6 +51,7 @@ function NavItem({
   icon,
   label,
   badge,
+  alert,
   active,
   soon,
 }: {
@@ -50,6 +59,8 @@ function NavItem({
   icon: ReactNode;
   label: string;
   badge?: number;
+  /** Red badge: something needs the merchant's attention. */
+  alert?: boolean;
   active?: boolean;
   soon?: boolean;
 }) {
@@ -58,8 +69,11 @@ function NavItem({
       <span className="grid size-4 place-items-center">{icon}</span>
       <span className="flex-1 truncate">{label}</span>
       {badge ? (
-        <span className="grid h-5 min-w-5 place-items-center rounded-full bg-line px-1.5 text-[11px] text-ink">
+        <span
+          className={`grid h-5 min-w-5 place-items-center rounded-full px-1.5 text-[11px] ${alert ? "bg-failed-tint text-failed" : "bg-line text-ink"}`}
+        >
           {badge}
+          {alert ? <span className="sr-only"> need review</span> : null}
         </span>
       ) : null}
       {soon ? <span className="text-[11px] text-subtle">Soon</span> : null}
@@ -81,7 +95,7 @@ function NavItem({
       {active ? (
         <motion.span
           layoutId="nav-active"
-          className="absolute inset-0 -z-10 rounded-full bg-surface"
+          className="absolute inset-0 -z-10 rounded-full bg-brand-tint"
           transition={{ type: "spring", stiffness: 420, damping: 36 }}
         />
       ) : null}
@@ -95,7 +109,7 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
   const router = useRouter();
   const client = useQueryClient();
   const merchant = useMerchant().data;
-  const total = usePayments("all", "").data?.counts.all;
+  const overview = useOverview().data;
   const search = useRef<HTMLInputElement>(null);
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -133,11 +147,9 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
         onSubmit={(event) => {
           event.preventDefault();
           const q = search.current?.value.trim() ?? "";
-          router.push(
-            q
-              ? `/dashboard/payments?q=${encodeURIComponent(q)}`
-              : "/dashboard/payments",
-          );
+          // A transaction hash finds the transaction; anything else searches payment links.
+          const base = looksLikeHash(q) ? "/dashboard/transactions" : "/dashboard/links";
+          router.push(q ? `${base}?q=${encodeURIComponent(q)}` : base);
           onNavigate?.();
         }}
       >
@@ -145,7 +157,7 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
         <input
           ref={search}
           name="q"
-          aria-label="Search payments"
+          aria-label="Search payment links, references or transaction hashes"
           placeholder="Search.."
           className="h-10 w-full rounded-full bg-surface pl-10 pr-10 text-sm outline-none placeholder:text-ink/70 focus:ring-1 focus:ring-brand"
         />
@@ -159,23 +171,31 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
         <NavItem
           href="/dashboard"
           icon={<LayoutGrid className={icon} />}
-          label="Overview"
+          label="Dashboard"
           active={pathname === "/dashboard"}
         />
         <NavItem
-          href="/dashboard/payments"
+          href="/dashboard/transactions"
           icon={<CreditCard className={icon} />}
-          label="Payments"
-          badge={total}
-          active={pathname.startsWith("/dashboard/payments")}
+          label="Transaction history"
+          badge={overview?.linksCreated}
+          active={pathname.startsWith("/dashboard/transactions")}
         />
         <NavItem
-          href="/dashboard/payments?status=awaiting"
+          href="/dashboard/links"
           icon={<SquareArrowOutUpRight className={icon} />}
-          label="Checkouts"
+          label="Link management"
+          active={pathname.startsWith("/dashboard/links")}
         />
-        <p className={group}>Payment methods</p>
-        <NavItem icon={<Wallet className={icon} />} label="All methods" soon />
+        <p className={group}>Payment operations</p>
+        <NavItem
+          href="/dashboard/reconciliation"
+          icon={<ListChecks className={icon} />}
+          label="Reconciliation"
+          badge={overview?.unmatched}
+          alert
+          active={pathname.startsWith("/dashboard/reconciliation")}
+        />
         <NavItem
           href="/dashboard/payment-methods/stellar-usdc"
           icon={<Wallet className={icon} />}
@@ -323,18 +343,20 @@ function Frame({ children }: { children: ReactNode }) {
           >
             <Menu className="size-4" />
           </button>
-          <p className="text-sm">
+          <p className="min-w-0 flex-1 truncate text-sm">
             <span className="hidden text-muted lg:inline">
               Workspace&nbsp;&nbsp;/&nbsp;&nbsp;
             </span>
             <span className="text-ink">{title}</span>
           </p>
+          <NotificationsBell />
         </header>
-        <main className="flex-1 bg-surface px-4 py-5 lg:px-6 lg:py-6">
+        <main className="flex-1 bg-white px-4 py-5 lg:px-8 lg:py-6">
           {children}
         </main>
       </div>
       <LiveUpdates />
+      <FeedbackButton />
     </div>
   );
 }

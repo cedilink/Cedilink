@@ -1,167 +1,123 @@
 "use client";
 
-import { ArrowRight, CircleAlert, CircleCheck, Clock, Plus, RefreshCw, TrendingDown, TrendingUp, Wallet } from "lucide-react";
+import { ArrowRight, Plus } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useCallback, type ReactNode } from "react";
-import bitcoin from "@/assets/illustrations/bitcoin.png";
-import stellarLogo from "@/assets/illustrations/stellar-logo.png";
-import walletCards from "@/assets/illustrations/wallet-cards.png";
+import emptyArt from "@/assets/illustrations/empty-payments.svg";
 import { CountUp } from "@/components/dashboard/count-up";
-import { Card, LoadError, Loading, PageHeader, PillButton, PillLink } from "@/components/dashboard/ui";
-import type { Overview } from "@/lib/api/client";
-import { useOverview } from "@/lib/dashboard/queries";
-import { formatUsd, truncateAddress } from "@/lib/format";
+import { StatusPill } from "@/components/dashboard/status-pill";
+import { Empty, LoadError, PageHeader, PillLink, SkeletonRows } from "@/components/dashboard/ui";
+import { useOverview, useStellarSettings } from "@/lib/dashboard/queries";
+import { formatUsd } from "@/lib/format";
 
-function Stat({ icon, tone, label, children, note }: { icon: ReactNode; tone: string; label: string; children: ReactNode; note: string }) {
+function Stat({ label, href, children, note }: { label: string; href: string; children: ReactNode; note: string }) {
   return (
-    <Card className="p-4">
-      <p className="flex items-center gap-2 text-xs text-ink">
-        <span className={`grid size-6 place-items-center rounded-md ${tone}`}>{icon}</span>
-        {label}
+    <Link href={href} className="group rounded-2xl border border-line bg-white p-5 transition-colors hover:border-brand/30">
+      <p className="text-sm text-heading">{label}</p>
+      <p className="mt-3 text-[32px] leading-none tracking-tight text-ink">{children}</p>
+      <p className="mt-3 flex items-center justify-between gap-2 text-xs text-muted">
+        {note}
+        <ArrowRight className="size-3.5 opacity-0 transition-opacity group-hover:opacity-100" aria-hidden />
       </p>
-      <p className="mt-3 flex flex-wrap items-baseline gap-x-2 text-[28px] leading-tight tracking-tight text-ink">{children}</p>
-      <p className="mt-2 truncate text-xs text-muted">{note}</p>
-    </Card>
+    </Link>
   );
 }
 
-function Money({ amount, asset }: { amount: string; asset: string }) {
-  const format = useCallback((n: number) => formatUsd(n.toFixed(2)), []);
-  return (
-    <>
-      <CountUp value={Number(amount)} format={format} />
-      <span className="text-[11px] tracking-normal text-muted">{asset}</span>
-    </>
-  );
-}
-
-function Change({ percent }: { percent: number | null }) {
-  if (percent === null) return null;
-  const up = percent >= 0;
-  const Icon = up ? TrendingUp : TrendingDown;
-  return (
-    <span className={`inline-flex items-center gap-1 rounded-full px-2 py-1 text-[11px] tracking-normal ${up ? "bg-paid-tint text-paid" : "bg-failed-tint text-failed"}`}>
-      <Icon className="size-3" />
-      {Math.abs(percent)}%
-    </span>
-  );
-}
-
-const METHOD_ART = { stellar_usdc: stellarLogo, card: walletCards, crypto: bitcoin } as const;
-
-function MethodCard({ method }: { method: Overview["methods"][number] }) {
-  const art = METHOD_ART[method.id as keyof typeof METHOD_ART] ?? stellarLogo;
-  const isStellar = method.id === "stellar_usdc";
-  const subtitle = isStellar
-    ? method.receivingAddress
-      ? `Receiving wallet ${truncateAddress(method.receivingAddress)}`
-      : "No receiving wallet yet"
-    : method.id === "card"
-      ? "Card payments"
-      : "Other networks";
-
-  return (
-    <Card className="flex flex-col overflow-hidden">
-      <div className="flex items-center gap-3 p-4">
-        <Image src={art} alt="" width={40} height={40} className="size-10 rounded-lg object-contain" />
-        <div className="min-w-0">
-          <p className="text-sm text-ink">{method.label}</p>
-          <p className="truncate text-xs text-muted">{subtitle}</p>
-        </div>
-      </div>
-      {isStellar && !method.enabled ? (
-        <div className="mt-auto p-4 pt-2">
-          <p className="mb-2 text-xs text-muted">Stellar USDC is not enabled yet</p>
-          <PillLink href="/dashboard/payment-methods/stellar-usdc" className="w-full">
-            Enable Stellar USDC
-          </PillLink>
-        </div>
-      ) : (
-        <>
-          <div className="px-4 pb-4">
-            <p className="text-xs text-muted">Received this month</p>
-            <p className="mt-1 text-[28px] leading-tight tracking-tight text-ink">
-              {method.receivedThisMonth === null ? <span className="text-subtle">—</span> : formatUsd(method.receivedThisMonth)}
-            </p>
-          </div>
-          <div className="mt-auto flex h-11 items-center justify-between border-t border-line px-4 text-xs text-muted">
-            {isStellar ? (
-              <>
-                <span>{method.network?.replace("Stellar ", "")}</span>
-                <Link href="/dashboard/payment-methods/stellar-usdc" className="inline-flex items-center gap-2 text-sm text-brand hover:underline">
-                  Manage <ArrowRight className="size-4" />
-                </Link>
-              </>
-            ) : (
-              <span>Not available in this demo</span>
-            )}
-          </div>
-        </>
-      )}
-    </Card>
-  );
-}
-
-export default function OverviewPage() {
-  const { data, error, refetch, isFetching } = useOverview();
+export default function DashboardPage() {
+  const { data, error, refetch } = useOverview();
+  const settings = useStellarSettings().data;
   const whole = useCallback((n: number) => String(Math.round(n)), []);
+  const money = useCallback((n: number) => formatUsd(n.toFixed(2)), []);
+  const ready = settings?.enabled && settings.receivingAddress;
 
   return (
     <>
-      <PageHeader title="Overview">
-        <PillButton variant="white" onClick={() => refetch()} disabled={isFetching}>
-          <RefreshCw className={`size-4 ${isFetching ? "animate-spin" : ""}`} /> Refresh
-        </PillButton>
-        <PillLink href="/dashboard/payments/new">
-          <Plus className="size-4" /> Create payment
+      <PageHeader title="Dashboard" subtitle="Stellar Testnet · Merchant workspace">
+        <PillLink href="/dashboard/links/new">
+          <Plus className="size-4" /> Create payment link
         </PillLink>
       </PageHeader>
+
+      {settings && !ready ? (
+        <div className="mb-6 flex flex-wrap items-center gap-3 rounded-2xl border border-brand/15 bg-brand-wash px-5 py-4">
+          <p className="min-w-0 flex-1 text-sm text-ink">
+            Add a receiving wallet to start. Payment links need a Stellar wallet to receive USDC.
+          </p>
+          <PillLink href="/dashboard/payment-methods/stellar-usdc">Set up Stellar USDC</PillLink>
+        </div>
+      ) : null}
 
       {error ? (
         <LoadError what="your merchant workspace" onRetry={() => refetch()} />
       ) : !data ? (
-        <Loading />
+        <SkeletonRows rows={4} label="Loading dashboard" />
       ) : (
         <>
           <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
-            <Stat
-              icon={<Wallet className="size-3.5" />}
-              tone="bg-paid-tint text-paid"
-              label="Total Received"
-              note={
-                data.totalReceived.changePercent === null
-                  ? Number(data.totalReceived.amount) === 0
-                    ? "No payments received yet"
-                    : "Verified on Stellar"
-                  : `${data.totalReceived.changePercent >= 0 ? "+" : ""}${data.totalReceived.changePercent}% vs last month`
-              }
-            >
-              <Money amount={data.totalReceived.amount} asset={data.totalReceived.asset} />
+            <Stat label="Verified payments" href="/dashboard/transactions?status=confirmed" note={`${data.verified.asset} · ${data.verified.count} transactions`}>
+              <CountUp value={Number(data.verified.amount)} format={money} />
             </Stat>
-            <Stat icon={<Clock className="size-3.5" />} tone="bg-awaiting-tint text-awaiting" label="Awaiting Payment" note={`${data.awaitingPayment.openCheckouts} open checkouts`}>
-              <Money amount={data.awaitingPayment.amount} asset={data.awaitingPayment.asset} />
+            <Stat label="Pending requests" href="/dashboard/links?status=pending" note="Awaiting customer payment">
+              <CountUp value={data.pendingRequests} format={whole} />
             </Stat>
-            <Stat icon={<CircleCheck className="size-3.5" />} tone="bg-confirming-tint text-confirming" label="Paid This Month" note="Payments verified on Stellar">
-              <CountUp value={data.paidThisMonth.count} format={whole} />
-              <Change percent={data.paidThisMonth.changePercent} />
+            <Stat label="Unmatched payments" href="/dashboard/reconciliation" note="Review in Reconciliation">
+              <span className={data.unmatched > 0 ? "text-failed" : undefined}>
+                <CountUp value={data.unmatched} format={whole} />
+              </span>
             </Stat>
-            <Stat icon={<CircleAlert className="size-3.5" />} tone="bg-failed-tint text-failed" label="Needs Attention" note="Failed or expired payments">
-              <CountUp value={data.needsAttention.count} format={whole} />
+            <Stat label="Payment links" href="/dashboard/links" note="Links created">
+              <CountUp value={data.linksCreated} format={whole} />
             </Stat>
           </div>
 
-          <div className="mb-3 mt-7 flex flex-wrap items-center justify-between gap-2">
-            <h2 className="text-lg tracking-tight text-ink">Payment methods</h2>
-            {data.methods.find((m) => m.id === "stellar_usdc")?.enabled ? (
-              <span className="rounded-full bg-paid-tint px-3 py-1.5 text-xs text-paid">Stellar Testnet connected</span>
-            ) : null}
+          <div className="mb-4 mt-9">
+            <h2 className="text-xl tracking-tight text-ink">Recent activity</h2>
+            <p className="mt-1 text-sm text-brand">Latest requests and payment checks</p>
           </div>
-          <div className="grid gap-3 md:grid-cols-3">
-            {data.methods.map((method) => (
-              <MethodCard key={method.id} method={method} />
-            ))}
-          </div>
+
+          {data.recentActivity.length === 0 ? (
+            <Empty
+              title="No activity yet"
+              message="Create a payment link and share it with a customer. Payments and checks will show up here."
+              art={<Image src={emptyArt} alt="" width={96} height={92} unoptimized />}
+            >
+              <PillLink href="/dashboard/links/new">
+                <Plus className="size-4" /> Create payment link
+              </PillLink>
+            </Empty>
+          ) : (
+            <div className="flex flex-col gap-3">
+              <div className="hidden h-12 grid-cols-[1.4fr_1fr_1fr_24px] items-center gap-4 rounded-2xl bg-surface px-5 text-sm text-heading md:grid">
+                <span>Request reference</span>
+                <span>Amount</span>
+                <span>Status</span>
+                <span />
+              </div>
+              {data.recentActivity.map((p) => (
+                <Link
+                  key={p.paymentId}
+                  href={`/dashboard/links/${p.paymentId}`}
+                  className="group grid grid-cols-[1fr_auto] items-center gap-x-4 gap-y-2 rounded-2xl border border-line px-5 py-4 transition-colors hover:border-brand/30 md:min-h-[72px] md:grid-cols-[1.4fr_1fr_1fr_24px]"
+                >
+                  <span className="min-w-0">
+                    <span className="block text-[15px] text-ink">{p.paymentId}</span>
+                    <span className="block truncate text-xs text-muted">{p.productName}</span>
+                  </span>
+                  <span className="text-[15px] text-ink max-md:order-3">
+                    {p.amount.replace(/\.00$/, "")} {p.asset}
+                  </span>
+                  <span className="max-md:order-2 max-md:justify-self-end">
+                    <StatusPill payment={p} />
+                  </span>
+                  <ArrowRight className="hidden size-4 text-muted transition-transform group-hover:translate-x-0.5 md:block" aria-hidden />
+                </Link>
+              ))}
+              <Link href="/dashboard/transactions" className="mt-1 self-start text-sm text-brand hover:underline">
+                View transaction history
+              </Link>
+            </div>
+          )}
         </>
       )}
     </>

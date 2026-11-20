@@ -36,7 +36,7 @@ function Created({ payment, onAnother }: { payment: Payment; onAnother: () => vo
           <CircleCheck className="size-5" />
         </span>
         <div>
-          <h1 className="text-xl tracking-tight text-ink">Checkout created</h1>
+          <h1 className="text-xl tracking-tight text-ink">Payment link created</h1>
           <p className="text-xs text-muted">Share this link with your customer.</p>
         </div>
       </div>
@@ -71,6 +71,9 @@ function Created({ payment, onAnother }: { payment: Payment; onAnother: () => vo
         <PillButton variant="white" onClick={onAnother}>
           <Plus className="size-4" /> Create another
         </PillButton>
+        <Link href={`/dashboard/links/${payment.paymentId}`} className="inline-flex h-10 items-center justify-center px-4 text-sm text-brand hover:underline">
+          View payment details
+        </Link>
       </div>
     </div>
   );
@@ -104,7 +107,7 @@ export default function CreatePaymentPage() {
 
   return (
     <>
-      <PageHeader title="Create Payment" />
+      <PageHeader title="Create payment link" subtitle={settings.data?.receivingAddress ? `Stellar Testnet · paid to ${truncateAddress(settings.data.receivingAddress)}` : "Stellar Testnet"} />
       {!settings.data ? (
         <Loading />
       ) : (
@@ -121,7 +124,11 @@ export default function CreatePaymentPage() {
                   productName: text("productName"),
                   amount: text("amount"),
                   orderId: text("orderId") || undefined,
-                  customer: { name: text("customerName") || undefined, email: text("customerEmail") || undefined },
+                  customer: {
+                    name: text("customerName") || undefined,
+                    email: text("customerEmail") || undefined,
+                    reference: text("customerReference") || undefined,
+                  },
                 },
               },
               // A rejected request never created anything, so the next attempt needs a fresh key.
@@ -146,14 +153,22 @@ export default function CreatePaymentPage() {
               <Field label="Amount" error={fields.amount}>
                 <input className={inputClass} name="amount" inputMode="decimal" placeholder="25.00" pattern="\d+(\.\d{1,7})?" title="A number such as 25 or 25.00" required aria-invalid={Boolean(fields.amount)} />
               </Field>
-              <Field label="Currency">
-                <FixedSelect value="USDC" />
+              <Field label="Asset" hint="Testnet USDC for now.">
+                <div className="relative">
+                  <select className={`${inputClass} appearance-none pr-10`} name="asset" defaultValue="USDC">
+                    <option value="USDC">USDC</option>
+                    <option value="XLM" disabled>
+                      XLM · coming soon
+                    </option>
+                  </select>
+                  <ChevronDown className="pointer-events-none absolute right-4 top-1/2 size-4 -translate-y-1/2 text-ink" />
+                </div>
               </Field>
             </div>
             <Field label="Payment method">
               <FixedSelect value="Stellar USDC" />
             </Field>
-            <Field label="Order ID or reference" error={orderTaken ? apiError?.message : fields.orderId} hint="Leave blank to generate one.">
+            <Field label="Order ID or reference" error={orderTaken ? apiError?.message : fields.orderId} hint="Your own reference. Leave blank to generate one.">
               <input className={inputClass} name="orderId" placeholder="CD-2026-00124" maxLength={64} aria-invalid={orderTaken || Boolean(fields.orderId)} />
             </Field>
             <Field label="Payment destination">
@@ -174,6 +189,9 @@ export default function CreatePaymentPage() {
                 <Field label="Email address" error={fields["customer.email"]}>
                   <input className={inputClass} name="customerEmail" type="email" placeholder="Enter email address" aria-invalid={Boolean(fields["customer.email"])} />
                 </Field>
+                <Field label="Customer reference" error={fields["customer.reference"]} hint="Your ID for this customer. Searchable in Transaction history.">
+                  <input className={inputClass} name="customerReference" placeholder="e.g. CUS-101" maxLength={64} />
+                </Field>
               </div>
             </div>
             {formError ? (
@@ -182,11 +200,11 @@ export default function CreatePaymentPage() {
               </p>
             ) : null}
             <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-              <Link href="/dashboard/payments" className="inline-flex h-10 items-center justify-center rounded-full border border-line px-5 text-sm font-medium text-ink hover:bg-surface">
+              <Link href="/dashboard/links" className="inline-flex h-10 items-center justify-center rounded-full border border-line px-5 text-sm font-medium text-ink hover:bg-surface">
                 Cancel
               </Link>
               <PillButton type="submit" disabled={create.isPending || !ready} className="px-6">
-                {create.isPending ? "Generating…" : "Generate checkout"}
+                {create.isPending ? "Generating…" : "Generate payment link"}
               </PillButton>
             </div>
           </Card>

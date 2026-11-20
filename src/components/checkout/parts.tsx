@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 
 /** The grey rounded panel that groups label/value rows. */
 export function Panel({ children }: { children: ReactNode }) {
-  return <dl className="flex flex-col gap-4 rounded-2xl bg-surface p-4">{children}</dl>;
+  return <dl className="flex flex-col gap-4 rounded-2xl bg-white p-4">{children}</dl>;
 }
 
 export function Row({ label, children, note }: { label: string; children: ReactNode; note?: string }) {
@@ -19,7 +19,7 @@ export function Row({ label, children, note }: { label: string; children: ReactN
 /** A single-line note with an info icon. */
 export function Note({ children, icon = true }: { children: ReactNode; icon?: boolean }) {
   return (
-    <p className="flex items-start gap-2.5 rounded-2xl bg-surface px-4 py-3.5 text-left text-sm text-ink">
+    <p className="flex items-start gap-2.5 rounded-2xl bg-white px-4 py-3.5 text-left text-sm text-ink">
       {icon ? <Info className="mt-0.5 size-4 shrink-0" strokeWidth={1.6} /> : null}
       <span>{children}</span>
     </p>

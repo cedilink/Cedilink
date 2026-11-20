@@ -269,10 +269,189 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Payment details with verification checks */
+        /** Payment details with verification checks and every transfer attributed to it */
         get: operations["getPayment"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/payments/{paymentId}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Cancel a payment link; refused while a transaction is in flight
+         * @description Error codes: CANNOT_CANCEL.
+         */
+        post: operations["cancelPayment"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/payments/{paymentId}/check-transaction": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Check a transaction hash against a payment and record the result
+         * @description Error codes: TRANSACTION_NOT_FOUND, NO_PAYMENT_IN_TRANSACTION.
+         */
+        post: operations["checkTransaction"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/transactions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Transaction history: one row per payment request with its latest transfer */
+        get: operations["listTransactions"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/reports/transactions.csv": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Transaction history as CSV, with the same filters; at most 50,000 rows */
+        get: operations["exportTransactions"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/transfers/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** One transfer with its checks, resolution and linked request */
+        get: operations["getTransfer"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/transfers/{id}/resolve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Accept a flagged transfer as payment, or dismiss it
+         * @description Error codes: CANNOT_ACCEPT, ALREADY_RESOLVED, NOTHING_TO_RESOLVE, PAYMENT_IN_PROGRESS.
+         */
+        post: operations["resolveTransfer"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/reconciliation": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Matched, unmatched and resolved transfers with counts */
+        get: operations["getReconciliation"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/notifications": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Newest notifications first, with the unread count */
+        get: operations["listNotifications"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/notifications/read": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Mark notifications read; all of them when ids is omitted */
+        post: operations["markNotificationsRead"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/feedback": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** User-testing feedback; signing in is optional */
+        post: operations["sendFeedback"];
         delete?: never;
         options?: never;
         head?: never;
@@ -287,7 +466,7 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Live payment updates for the signed-in merchant
+         * Live payment.updated, transfer.recorded and notification.created events for the signed-in merchant
          * @description Server-Sent Events. Each `payment.updated` event carries the schema below as JSON.
          */
         get: operations["streamMerchantEvents"];
@@ -484,7 +663,7 @@ export interface components {
             };
         };
         /** @enum {string} */
-        PaymentStatus: "CREATED" | "AWAITING_PAYMENT" | "PAYMENT_INITIATED" | "TRANSACTION_SUBMITTED" | "CONFIRMING" | "PAID" | "FAILED" | "EXPIRED";
+        PaymentStatus: "CREATED" | "AWAITING_PAYMENT" | "PAYMENT_INITIATED" | "TRANSACTION_SUBMITTED" | "CONFIRMING" | "PAID" | "FAILED" | "EXPIRED" | "CANCELLED";
         Merchant: {
             id: string;
             name: string;
@@ -566,9 +745,14 @@ export interface components {
             method: string;
             network: string;
             /** @enum {string} */
-            status: "CREATED" | "AWAITING_PAYMENT" | "PAYMENT_INITIATED" | "TRANSACTION_SUBMITTED" | "CONFIRMING" | "PAID" | "FAILED" | "EXPIRED";
+            status: "CREATED" | "AWAITING_PAYMENT" | "PAYMENT_INITIATED" | "TRANSACTION_SUBMITTED" | "CONFIRMING" | "PAID" | "FAILED" | "EXPIRED" | "CANCELLED";
             /** @enum {string} */
             tab: "awaiting" | "confirming" | "paid" | "failed" | "expired";
+            /** @enum {string} */
+            displayStatus: "pending" | "confirmed" | "flagged" | "failed" | "expired" | "cancelled";
+            pendingStage: ("awaiting" | "confirming") | null;
+            /** @enum {string} */
+            reviewState: "none" | "flagged" | "resolved";
             flag: string | null;
             statusMessage: string;
             failureReason: string | null;
@@ -577,6 +761,7 @@ export interface components {
             customer: {
                 name: string | null;
                 email: string | null;
+                reference: string | null;
             };
             transactionHash: string | null;
             explorerUrl: string | null;
@@ -591,9 +776,267 @@ export interface components {
             } | null;
             checkoutUrl: string;
             returnUrl: string | null;
+            cancellable: boolean;
             expiresAt: string;
             createdAt: string;
+            updatedAt: string;
             paidAt: string | null;
+            transfers?: {
+                id: string;
+                paymentId: string | null;
+                /** @enum {string} */
+                source: "watcher" | "checkout" | "manual_check";
+                transactionHash: string;
+                explorerUrl: string;
+                operationId: string | null;
+                fromAddress: string;
+                toAddress: string;
+                memo: string | null;
+                successful: boolean;
+                ledgerClosedAt: string;
+                expected: {
+                    amount: string;
+                    asset: string;
+                    assetIssuer: string | null;
+                    destination: string | null;
+                } | null;
+                received: {
+                    amount: string;
+                    asset: string;
+                    assetIssuer: string | null;
+                };
+                checks: {
+                    successful: boolean;
+                    recipient: boolean;
+                    asset: boolean;
+                    amount: boolean;
+                    reference: boolean;
+                } | null;
+                /** @enum {string} */
+                state: "matched" | "flagged" | "unmatched" | "failed";
+                reason: ("FAILED_ON_CHAIN" | "NO_REFERENCE" | "UNKNOWN_REFERENCE" | "REFERENCE_MISMATCH" | "ALREADY_PAID" | "REQUEST_CANCELLED" | "REQUEST_EXPIRED" | "WRONG_RECIPIENT" | "WRONG_ASSET" | "UNDERPAID" | "OVERPAID" | "UNVERIFIED") | null;
+                reasonMessage: string;
+                needsReview: boolean;
+                acceptable: boolean;
+                resolution: {
+                    /** @enum {string} */
+                    action: "accepted" | "dismissed";
+                    note: string | null;
+                    resolvedAt: string | null;
+                } | null;
+                createdAt: string;
+            }[];
+        };
+        /** @enum {string} */
+        DisplayStatus: "pending" | "confirmed" | "flagged" | "failed" | "expired" | "cancelled";
+        Transfer: {
+            id: string;
+            paymentId: string | null;
+            /** @enum {string} */
+            source: "watcher" | "checkout" | "manual_check";
+            transactionHash: string;
+            explorerUrl: string;
+            operationId: string | null;
+            fromAddress: string;
+            toAddress: string;
+            memo: string | null;
+            successful: boolean;
+            ledgerClosedAt: string;
+            expected: {
+                amount: string;
+                asset: string;
+                assetIssuer: string | null;
+                destination: string | null;
+            } | null;
+            received: {
+                amount: string;
+                asset: string;
+                assetIssuer: string | null;
+            };
+            checks: {
+                successful: boolean;
+                recipient: boolean;
+                asset: boolean;
+                amount: boolean;
+                reference: boolean;
+            } | null;
+            /** @enum {string} */
+            state: "matched" | "flagged" | "unmatched" | "failed";
+            reason: ("FAILED_ON_CHAIN" | "NO_REFERENCE" | "UNKNOWN_REFERENCE" | "REFERENCE_MISMATCH" | "ALREADY_PAID" | "REQUEST_CANCELLED" | "REQUEST_EXPIRED" | "WRONG_RECIPIENT" | "WRONG_ASSET" | "UNDERPAID" | "OVERPAID" | "UNVERIFIED") | null;
+            reasonMessage: string;
+            needsReview: boolean;
+            acceptable: boolean;
+            resolution: {
+                /** @enum {string} */
+                action: "accepted" | "dismissed";
+                note: string | null;
+                resolvedAt: string | null;
+            } | null;
+            createdAt: string;
+        };
+        TransferChecks: {
+            successful: boolean;
+            recipient: boolean;
+            asset: boolean;
+            amount: boolean;
+            reference: boolean;
+        };
+        TransactionRow: {
+            paymentId: string;
+            orderId: string;
+            productName: string;
+            customer: {
+                name: string | null;
+                email: string | null;
+                reference: string | null;
+            };
+            amount: string;
+            asset: string;
+            /** @enum {string} */
+            status: "CREATED" | "AWAITING_PAYMENT" | "PAYMENT_INITIATED" | "TRANSACTION_SUBMITTED" | "CONFIRMING" | "PAID" | "FAILED" | "EXPIRED" | "CANCELLED";
+            /** @enum {string} */
+            displayStatus: "pending" | "confirmed" | "flagged" | "failed" | "expired" | "cancelled";
+            pendingStage: ("awaiting" | "confirming") | null;
+            createdAt: string;
+            latestTransfer: {
+                id: string;
+                transactionHash: string;
+                explorerUrl: string;
+                fromAddress: string;
+                amount: string;
+                asset: string;
+                /** @enum {string} */
+                state: "matched" | "flagged" | "unmatched" | "failed";
+                reason: ("FAILED_ON_CHAIN" | "NO_REFERENCE" | "UNKNOWN_REFERENCE" | "REFERENCE_MISMATCH" | "ALREADY_PAID" | "REQUEST_CANCELLED" | "REQUEST_EXPIRED" | "WRONG_RECIPIENT" | "WRONG_ASSET" | "UNDERPAID" | "OVERPAID" | "UNVERIFIED") | null;
+                ledgerClosedAt: string;
+            } | null;
+            transferCount: number;
+        };
+        TransactionList: {
+            transactions: {
+                paymentId: string;
+                orderId: string;
+                productName: string;
+                customer: {
+                    name: string | null;
+                    email: string | null;
+                    reference: string | null;
+                };
+                amount: string;
+                asset: string;
+                /** @enum {string} */
+                status: "CREATED" | "AWAITING_PAYMENT" | "PAYMENT_INITIATED" | "TRANSACTION_SUBMITTED" | "CONFIRMING" | "PAID" | "FAILED" | "EXPIRED" | "CANCELLED";
+                /** @enum {string} */
+                displayStatus: "pending" | "confirmed" | "flagged" | "failed" | "expired" | "cancelled";
+                pendingStage: ("awaiting" | "confirming") | null;
+                createdAt: string;
+                latestTransfer: {
+                    id: string;
+                    transactionHash: string;
+                    explorerUrl: string;
+                    fromAddress: string;
+                    amount: string;
+                    asset: string;
+                    /** @enum {string} */
+                    state: "matched" | "flagged" | "unmatched" | "failed";
+                    reason: ("FAILED_ON_CHAIN" | "NO_REFERENCE" | "UNKNOWN_REFERENCE" | "REFERENCE_MISMATCH" | "ALREADY_PAID" | "REQUEST_CANCELLED" | "REQUEST_EXPIRED" | "WRONG_RECIPIENT" | "WRONG_ASSET" | "UNDERPAID" | "OVERPAID" | "UNVERIFIED") | null;
+                    ledgerClosedAt: string;
+                } | null;
+                transferCount: number;
+            }[];
+            total: number;
+            nextCursor: string | null;
+        };
+        Reconciliation: {
+            counts: {
+                matched: number;
+                unmatched: number;
+                resolved: number;
+            };
+            items: {
+                id: string;
+                paymentId: string | null;
+                /** @enum {string} */
+                source: "watcher" | "checkout" | "manual_check";
+                transactionHash: string;
+                explorerUrl: string;
+                operationId: string | null;
+                fromAddress: string;
+                toAddress: string;
+                memo: string | null;
+                successful: boolean;
+                ledgerClosedAt: string;
+                expected: {
+                    amount: string;
+                    asset: string;
+                    assetIssuer: string | null;
+                    destination: string | null;
+                } | null;
+                received: {
+                    amount: string;
+                    asset: string;
+                    assetIssuer: string | null;
+                };
+                checks: {
+                    successful: boolean;
+                    recipient: boolean;
+                    asset: boolean;
+                    amount: boolean;
+                    reference: boolean;
+                } | null;
+                /** @enum {string} */
+                state: "matched" | "flagged" | "unmatched" | "failed";
+                reason: ("FAILED_ON_CHAIN" | "NO_REFERENCE" | "UNKNOWN_REFERENCE" | "REFERENCE_MISMATCH" | "ALREADY_PAID" | "REQUEST_CANCELLED" | "REQUEST_EXPIRED" | "WRONG_RECIPIENT" | "WRONG_ASSET" | "UNDERPAID" | "OVERPAID" | "UNVERIFIED") | null;
+                reasonMessage: string;
+                needsReview: boolean;
+                acceptable: boolean;
+                resolution: {
+                    /** @enum {string} */
+                    action: "accepted" | "dismissed";
+                    note: string | null;
+                    resolvedAt: string | null;
+                } | null;
+                createdAt: string;
+            }[];
+            nextCursor: string | null;
+        };
+        Notification: {
+            id: string;
+            /** @enum {string} */
+            type: "payment_received" | "payment_pending" | "payment_failed" | "payment_unmatched" | "request_expired" | "payment_verified";
+            title: string;
+            body: string;
+            paymentId: string | null;
+            transferId: string | null;
+            read: boolean;
+            createdAt: string;
+        };
+        NotificationList: {
+            notifications: {
+                id: string;
+                /** @enum {string} */
+                type: "payment_received" | "payment_pending" | "payment_failed" | "payment_unmatched" | "request_expired" | "payment_verified";
+                title: string;
+                body: string;
+                paymentId: string | null;
+                transferId: string | null;
+                read: boolean;
+                createdAt: string;
+            }[];
+            unreadCount: number;
+            nextCursor: string | null;
+        };
+        CheckoutTransfer: {
+            /** @enum {string} */
+            state: "matched" | "flagged" | "unmatched" | "failed";
+            reason: ("FAILED_ON_CHAIN" | "NO_REFERENCE" | "UNKNOWN_REFERENCE" | "REFERENCE_MISMATCH" | "ALREADY_PAID" | "REQUEST_CANCELLED" | "REQUEST_EXPIRED" | "WRONG_RECIPIENT" | "WRONG_ASSET" | "UNDERPAID" | "OVERPAID" | "UNVERIFIED") | null;
+            message: string;
+            received: {
+                amount: string;
+                asset: string;
+            };
+            resolved: boolean;
+            receivedAt: string;
         };
         PaymentList: {
             payments: {
@@ -605,9 +1048,14 @@ export interface components {
                 method: string;
                 network: string;
                 /** @enum {string} */
-                status: "CREATED" | "AWAITING_PAYMENT" | "PAYMENT_INITIATED" | "TRANSACTION_SUBMITTED" | "CONFIRMING" | "PAID" | "FAILED" | "EXPIRED";
+                status: "CREATED" | "AWAITING_PAYMENT" | "PAYMENT_INITIATED" | "TRANSACTION_SUBMITTED" | "CONFIRMING" | "PAID" | "FAILED" | "EXPIRED" | "CANCELLED";
                 /** @enum {string} */
                 tab: "awaiting" | "confirming" | "paid" | "failed" | "expired";
+                /** @enum {string} */
+                displayStatus: "pending" | "confirmed" | "flagged" | "failed" | "expired" | "cancelled";
+                pendingStage: ("awaiting" | "confirming") | null;
+                /** @enum {string} */
+                reviewState: "none" | "flagged" | "resolved";
                 flag: string | null;
                 statusMessage: string;
                 failureReason: string | null;
@@ -616,6 +1064,7 @@ export interface components {
                 customer: {
                     name: string | null;
                     email: string | null;
+                    reference: string | null;
                 };
                 transactionHash: string | null;
                 explorerUrl: string | null;
@@ -630,17 +1079,68 @@ export interface components {
                 } | null;
                 checkoutUrl: string;
                 returnUrl: string | null;
+                cancellable: boolean;
                 expiresAt: string;
                 createdAt: string;
+                updatedAt: string;
                 paidAt: string | null;
+                transfers?: {
+                    id: string;
+                    paymentId: string | null;
+                    /** @enum {string} */
+                    source: "watcher" | "checkout" | "manual_check";
+                    transactionHash: string;
+                    explorerUrl: string;
+                    operationId: string | null;
+                    fromAddress: string;
+                    toAddress: string;
+                    memo: string | null;
+                    successful: boolean;
+                    ledgerClosedAt: string;
+                    expected: {
+                        amount: string;
+                        asset: string;
+                        assetIssuer: string | null;
+                        destination: string | null;
+                    } | null;
+                    received: {
+                        amount: string;
+                        asset: string;
+                        assetIssuer: string | null;
+                    };
+                    checks: {
+                        successful: boolean;
+                        recipient: boolean;
+                        asset: boolean;
+                        amount: boolean;
+                        reference: boolean;
+                    } | null;
+                    /** @enum {string} */
+                    state: "matched" | "flagged" | "unmatched" | "failed";
+                    reason: ("FAILED_ON_CHAIN" | "NO_REFERENCE" | "UNKNOWN_REFERENCE" | "REFERENCE_MISMATCH" | "ALREADY_PAID" | "REQUEST_CANCELLED" | "REQUEST_EXPIRED" | "WRONG_RECIPIENT" | "WRONG_ASSET" | "UNDERPAID" | "OVERPAID" | "UNVERIFIED") | null;
+                    reasonMessage: string;
+                    needsReview: boolean;
+                    acceptable: boolean;
+                    resolution: {
+                        /** @enum {string} */
+                        action: "accepted" | "dismissed";
+                        note: string | null;
+                        resolvedAt: string | null;
+                    } | null;
+                    createdAt: string;
+                }[];
             }[];
             counts: {
                 all: number;
+                pending: number;
+                confirmed: number;
+                flagged: number;
+                failed: number;
+                expired: number;
+                cancelled: number;
                 awaiting: number;
                 confirming: number;
                 paid: number;
-                failed: number;
-                expired: number;
             };
             nextCursor: string | null;
         };
@@ -670,17 +1170,40 @@ export interface components {
                 network?: string;
                 receivedThisMonth: string | null;
             }[];
+            verified: {
+                amount: string;
+                asset: string;
+                count: number;
+            };
+            pendingRequests: number;
+            unmatched: number;
+            linksCreated: number;
+            recentActivity: {
+                paymentId: string;
+                productName: string;
+                amount: string;
+                asset: string;
+                /** @enum {string} */
+                displayStatus: "pending" | "confirmed" | "flagged" | "failed" | "expired" | "cancelled";
+                createdAt: string;
+                updatedAt: string;
+            }[];
         };
         PaymentUpdate: {
             merchantId: string;
             paymentId: string;
             orderId: string;
             /** @enum {string} */
-            status: "CREATED" | "AWAITING_PAYMENT" | "PAYMENT_INITIATED" | "TRANSACTION_SUBMITTED" | "CONFIRMING" | "PAID" | "FAILED" | "EXPIRED";
+            status: "CREATED" | "AWAITING_PAYMENT" | "PAYMENT_INITIATED" | "TRANSACTION_SUBMITTED" | "CONFIRMING" | "PAID" | "FAILED" | "EXPIRED" | "CANCELLED";
             flag: string | null;
+            /** @enum {string} */
+            reviewState: "none" | "flagged" | "resolved";
             amount: string;
             assetCode: string;
             transactionHash: string | null;
+            /** @enum {string} */
+            previousStatus?: "CREATED" | "AWAITING_PAYMENT" | "PAYMENT_INITIATED" | "TRANSACTION_SUBMITTED" | "CONFIRMING" | "PAID" | "FAILED" | "EXPIRED" | "CANCELLED";
+            byMerchant?: boolean;
         };
         Checkout: {
             paymentId: string;
@@ -700,7 +1223,7 @@ export interface components {
             };
             recipientAddress: string;
             /** @enum {string} */
-            status: "CREATED" | "AWAITING_PAYMENT" | "PAYMENT_INITIATED" | "TRANSACTION_SUBMITTED" | "CONFIRMING" | "PAID" | "FAILED" | "EXPIRED";
+            status: "CREATED" | "AWAITING_PAYMENT" | "PAYMENT_INITIATED" | "TRANSACTION_SUBMITTED" | "CONFIRMING" | "PAID" | "FAILED" | "EXPIRED" | "CANCELLED";
             failureReason: string | null;
             methods: {
                 id: string;
@@ -713,6 +1236,18 @@ export interface components {
             returnUrl: string | null;
             expiresAt: string;
             paidAt: string | null;
+            lastTransfer: {
+                /** @enum {string} */
+                state: "matched" | "flagged" | "unmatched" | "failed";
+                reason: ("FAILED_ON_CHAIN" | "NO_REFERENCE" | "UNKNOWN_REFERENCE" | "REFERENCE_MISMATCH" | "ALREADY_PAID" | "REQUEST_CANCELLED" | "REQUEST_EXPIRED" | "WRONG_RECIPIENT" | "WRONG_ASSET" | "UNDERPAID" | "OVERPAID" | "UNVERIFIED") | null;
+                message: string;
+                received: {
+                    amount: string;
+                    asset: string;
+                };
+                resolved: boolean;
+                receivedAt: string;
+            } | null;
         };
         Preflight: {
             ok: boolean;
@@ -745,15 +1280,27 @@ export interface components {
         };
         SubmitResult: {
             /** @enum {string} */
-            status: "CREATED" | "AWAITING_PAYMENT" | "PAYMENT_INITIATED" | "TRANSACTION_SUBMITTED" | "CONFIRMING" | "PAID" | "FAILED" | "EXPIRED";
+            status: "CREATED" | "AWAITING_PAYMENT" | "PAYMENT_INITIATED" | "TRANSACTION_SUBMITTED" | "CONFIRMING" | "PAID" | "FAILED" | "EXPIRED" | "CANCELLED";
             transactionHash: string | null;
         };
         CheckoutStatus: {
             /** @enum {string} */
-            status: "CREATED" | "AWAITING_PAYMENT" | "PAYMENT_INITIATED" | "TRANSACTION_SUBMITTED" | "CONFIRMING" | "PAID" | "FAILED" | "EXPIRED";
+            status: "CREATED" | "AWAITING_PAYMENT" | "PAYMENT_INITIATED" | "TRANSACTION_SUBMITTED" | "CONFIRMING" | "PAID" | "FAILED" | "EXPIRED" | "CANCELLED";
             transactionHash: string | null;
             failureReason: string | null;
             paidAt: string | null;
+            lastTransfer: {
+                /** @enum {string} */
+                state: "matched" | "flagged" | "unmatched" | "failed";
+                reason: ("FAILED_ON_CHAIN" | "NO_REFERENCE" | "UNKNOWN_REFERENCE" | "REFERENCE_MISMATCH" | "ALREADY_PAID" | "REQUEST_CANCELLED" | "REQUEST_EXPIRED" | "WRONG_RECIPIENT" | "WRONG_ASSET" | "UNDERPAID" | "OVERPAID" | "UNVERIFIED") | null;
+                message: string;
+                received: {
+                    amount: string;
+                    asset: string;
+                };
+                resolved: boolean;
+                receivedAt: string;
+            } | null;
         };
     };
     responses: never;
@@ -1227,8 +1774,13 @@ export interface operations {
     listPayments: {
         parameters: {
             query?: {
-                status?: "all" | "awaiting" | "confirming" | "paid" | "failed" | "expired";
                 q?: string;
+                from?: string;
+                to?: string;
+                minAmount?: string;
+                maxAmount?: string;
+                asset?: string;
+                status?: "all" | "pending" | "confirmed" | "flagged" | "failed" | "expired" | "cancelled" | "awaiting" | "confirming" | "paid";
                 cursor?: string;
                 limit?: number;
             };
@@ -1275,11 +1827,14 @@ export interface operations {
                     /** @constant */
                     currency: "USDC";
                     /** @constant */
+                    asset?: "USDC";
+                    /** @constant */
                     method: "stellar_usdc";
                     orderId?: string;
                     customer?: {
                         name?: string;
                         email?: string | "";
+                        reference?: string;
                     };
                     /** Format: uri */
                     returnUrl?: string;
@@ -1326,6 +1881,369 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Payment"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    cancelPayment: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @example SP-00124 */
+                paymentId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Payment"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    checkTransaction: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @example SP-00124 */
+                paymentId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    transactionHash: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Transfer"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    listTransactions: {
+        parameters: {
+            query?: {
+                q?: string;
+                from?: string;
+                to?: string;
+                minAmount?: string;
+                maxAmount?: string;
+                asset?: string;
+                status?: "all" | "pending" | "confirmed" | "flagged" | "failed" | "expired" | "cancelled" | "awaiting" | "confirming" | "paid";
+                cursor?: string;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TransactionList"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    exportTransactions: {
+        parameters: {
+            query?: {
+                q?: string;
+                from?: string;
+                to?: string;
+                minAmount?: string;
+                maxAmount?: string;
+                asset?: string;
+                status?: "all" | "pending" | "confirmed" | "flagged" | "failed" | "expired" | "cancelled" | "awaiting" | "confirming" | "paid";
+                cursor?: string;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "text/csv": string;
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    getTransfer: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Transfer"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    resolveTransfer: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @enum {string} */
+                    action: "accept" | "dismiss";
+                    note?: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Transfer"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    getReconciliation: {
+        parameters: {
+            query?: {
+                state?: "matched" | "unmatched" | "resolved";
+                cursor?: string;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Reconciliation"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    listNotifications: {
+        parameters: {
+            query?: {
+                cursor?: string;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NotificationList"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    markNotificationsRead: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    ids?: string[];
+                };
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        unreadCount: number;
+                    };
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    sendFeedback: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    scenario: string;
+                    rating: number;
+                    worked: boolean;
+                    comment?: string;
+                    contact?: string;
+                    page?: string;
+                    appVersion?: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Success */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        ok: boolean;
+                    };
                 };
             };
             /** @description Error */
@@ -1574,7 +2492,7 @@ export interface operations {
                 content: {
                     "application/json": {
                         /** @enum {string} */
-                        status: "CREATED" | "AWAITING_PAYMENT" | "PAYMENT_INITIATED" | "TRANSACTION_SUBMITTED" | "CONFIRMING" | "PAID" | "FAILED" | "EXPIRED";
+                        status: "CREATED" | "AWAITING_PAYMENT" | "PAYMENT_INITIATED" | "TRANSACTION_SUBMITTED" | "CONFIRMING" | "PAID" | "FAILED" | "EXPIRED" | "CANCELLED";
                     };
                 };
             };
@@ -1677,7 +2595,12 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "text/event-stream": components["schemas"]["SubmitResult"];
+                    "text/event-stream": {
+                        /** @enum {string} */
+                        status: "CREATED" | "AWAITING_PAYMENT" | "PAYMENT_INITIATED" | "TRANSACTION_SUBMITTED" | "CONFIRMING" | "PAID" | "FAILED" | "EXPIRED" | "CANCELLED";
+                        transactionHash: string | null;
+                        flagged: boolean;
+                    };
                 };
             };
             /** @description Error */

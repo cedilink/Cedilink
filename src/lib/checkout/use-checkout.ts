@@ -5,7 +5,7 @@ import { api, ApiError, type Checkout, type CheckoutStatus, type Preflight } fro
 import { getWallet, WalletError, type WalletId } from "@/lib/wallets";
 import { initialState, reduce } from "./machine";
 
-const TERMINAL = ["PAID", "EXPIRED"];
+const TERMINAL = ["PAID", "EXPIRED", "CANCELLED"];
 // How long the processing screen waits before switching to the calmer "pending" screen.
 const PENDING_AFTER_MS = 30_000;
 const POLL_EVERY_MS = 4_000;
@@ -18,9 +18,12 @@ export function useCheckout(checkout: Checkout) {
   // signature from that prompt is discarded.
   const attempt = useRef(0);
 
-  const applyStatus = useCallback((s: Pick<CheckoutStatus, "status" | "transactionHash"> & { paidAt?: string | null }) => {
-    dispatch({ type: "STATUS", status: s.status, transactionHash: s.transactionHash, paidAt: s.paidAt });
-  }, []);
+  const applyStatus = useCallback(
+    (s: Pick<CheckoutStatus, "status" | "transactionHash"> & { paidAt?: string | null; lastTransfer?: CheckoutStatus["lastTransfer"] }) => {
+      dispatch({ type: "STATUS", status: s.status, transactionHash: s.transactionHash, paidAt: s.paidAt, lastTransfer: s.lastTransfer });
+    },
+    [],
+  );
 
   const refreshStatus = useCallback(async () => {
     try {
@@ -39,8 +42,9 @@ export function useCheckout(checkout: Checkout) {
       try {
         const update = JSON.parse(event.data);
         applyStatus(update);
-        // Live updates carry only the status; fetch the rest (payment time) once it is paid.
-        if (update.status === "PAID" && !update.paidAt) void refreshStatus();
+        // Live updates carry only the status; fetch the rest (payment time, or what a payment
+        // that did not match contained) when there is more to show.
+        if ((update.status === "PAID" && !update.paidAt) || update.flagged) void refreshStatus();
       } catch {
         // Ignore a malformed event.
       }

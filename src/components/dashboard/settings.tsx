@@ -292,12 +292,12 @@ function BusinessProfile({ account }: { account: Account }) {
           <div aria-hidden className="flex flex-col rounded-2xl bg-surface p-4">
             <p className="text-xs text-muted">What customers see</p>
             <div className="mt-3 rounded-2xl bg-white p-4">
-              <p className="flex items-center gap-2.5 text-sm text-ink">
+              <div className="flex items-center gap-2.5 text-sm text-ink">
                 <Mascot size={32} />
                 <span className="min-w-0 truncate">
                   {businessName.trim() || "Your business name"}
                 </span>
-              </p>
+              </div>
               <p className="mt-4 text-xs text-muted">Amount due</p>
               <p className="text-2xl tracking-tight text-ink">$25.00</p>
             </div>
