@@ -5,8 +5,6 @@ import {
   Bell,
   Building2,
   Check,
-  Eye,
-  EyeOff,
   KeyRound,
   LogOut,
   Mail,
@@ -34,6 +32,7 @@ import { formatDate, truncateAddress } from "@/lib/format";
 import { Mascot } from "../motion/mascot";
 import { CopyButton } from "../ui/copy-button";
 import { Card, Field, inputClass, PillButton, PillLink, Toggle } from "./ui";
+import { PasswordInput } from "../ui/password-input";
 
 // The page's sections, in order. The side list and the cards are both built from this.
 const SECTIONS = [
@@ -178,48 +177,6 @@ function problems(
       : {};
   if (Object.keys(fields).length > 0) return { fields };
   return { fields, form: error instanceof ApiError ? error.message : fallback };
-}
-
-function PasswordInput({
-  id,
-  name,
-  value,
-  onChange,
-  autoComplete,
-  invalid,
-}: {
-  id: string;
-  name: string;
-  value: string;
-  onChange: (value: string) => void;
-  autoComplete: string;
-  invalid?: boolean;
-}) {
-  const [shown, setShown] = useState(false);
-  return (
-    <span className="relative block">
-      <input
-        id={id}
-        className={`${inputClass} pr-12`}
-        type={shown ? "text" : "password"}
-        name={name}
-        value={value}
-        onChange={(event) => onChange(event.target.value)}
-        autoComplete={autoComplete}
-        aria-invalid={invalid}
-        required
-      />
-      <button
-        type="button"
-        aria-label={shown ? "Hide password" : "Show password"}
-        aria-pressed={shown}
-        onClick={() => setShown((value) => !value)}
-        className="absolute right-1.5 top-1/2 grid size-8 -translate-y-1/2 place-items-center rounded-full text-muted hover:bg-surface hover:text-ink"
-      >
-        {shown ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
-      </button>
-    </span>
-  );
 }
 
 function BusinessProfile({ account }: { account: Account }) {
@@ -382,12 +339,13 @@ function SignInEmail({ account }: { account: Account }) {
               id={passwordId}
               name="currentPassword"
               value={password}
-              onChange={(value) => {
-                setPassword(value);
+              onChange={(event) => {
+                setPassword(event.target.value);
                 change.reset();
               }}
               autoComplete="current-password"
-              invalid={Boolean(fields.currentPassword)}
+              aria-invalid={Boolean(fields.currentPassword)}
+              required
             />
           </Field>
         </div>
@@ -459,9 +417,10 @@ function Password() {
                 id={`${id}-current`}
                 name="currentPassword"
                 value={current}
-                onChange={edit(setCurrent)}
+                onChange={(event) => edit(setCurrent)(event.target.value)}
                 autoComplete="current-password"
-                invalid={Boolean(fields.currentPassword)}
+                aria-invalid={Boolean(fields.currentPassword)}
+                required
               />
             </Field>
           </div>
@@ -479,9 +438,10 @@ function Password() {
               id={`${id}-new`}
               name="newPassword"
               value={next}
-              onChange={edit(setNext)}
+              onChange={(event) => edit(setNext)(event.target.value)}
               autoComplete="new-password"
-              invalid={tooShort || Boolean(fields.newPassword)}
+              aria-invalid={tooShort || Boolean(fields.newPassword)}
+              required
             />
           </Field>
           <Field
@@ -493,9 +453,10 @@ function Password() {
               id={`${id}-confirm`}
               name="confirmPassword"
               value={confirm}
-              onChange={edit(setConfirm)}
+              onChange={(event) => edit(setConfirm)(event.target.value)}
               autoComplete="new-password"
-              invalid={mismatch}
+              aria-invalid={mismatch}
+              required
             />
           </Field>
         </div>

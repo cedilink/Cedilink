@@ -12,6 +12,7 @@ import { CopyButton } from "@/components/ui/copy-button";
 import { api, ApiError, type Schemas } from "@/lib/api/client";
 import { truncateAddress } from "@/lib/format";
 import { getWallet, type WalletId } from "@/lib/wallets";
+import { PasswordInput } from "@/components/ui/password-input";
 
 type Config = Schemas["Config"];
 type WalletChoice = "managed" | "own";
@@ -134,8 +135,8 @@ export default function SignupPage() {
         <Field label="Email address" error={fields.email}>
           <input className={inputClass} type="email" name="email" autoComplete="username" required aria-invalid={Boolean(fields.email)} />
         </Field>
-        <Field label="Password" error={fields.password} hint="At least 8 characters.">
-          <input className={inputClass} type="password" name="password" autoComplete="new-password" minLength={8} required aria-invalid={Boolean(fields.password)} />
+        <Field label="Password" error={fields.password} hint="At least 8 characters." htmlFor="signup-password">
+          <PasswordInput id="signup-password" name="password" autoComplete="new-password" minLength={8} required aria-invalid={Boolean(fields.password)} />
         </Field>
 
         <fieldset>

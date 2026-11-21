@@ -6,6 +6,7 @@ import { useState } from "react";
 import { Field, inputClass } from "@/components/dashboard/ui";
 import { Mascot } from "@/components/motion/mascot";
 import { Button } from "@/components/ui/button";
+import { PasswordInput } from "@/components/ui/password-input";
 import { api, ApiError } from "@/lib/api/client";
 
 export default function LoginPage() {
@@ -67,10 +68,9 @@ export default function LoginPage() {
             required
           />
         </Field>
-        <Field label="Password" error={error}>
-          <input
-            className={inputClass}
-            type="password"
+        <Field label="Password" error={error} htmlFor="password">
+          <PasswordInput
+            id="password"
             name="password"
             autoComplete="current-password"
             required
