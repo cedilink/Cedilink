@@ -24,6 +24,9 @@ const nextConfig: NextConfig = {
       { source: "/dashboard/:path*", headers: noindex },
       { source: "/c/:path*", headers: noindex },
       { source: "/offline.html", headers: noindex },
+      { source: "/forgot-password", headers: noindex },
+      // The reset link's token is in the address, so no referrer is sent from this page.
+      { source: "/reset-password", headers: [...noindex, { key: "Referrer-Policy", value: "no-referrer" }] },
       {
         // The service worker must never be served stale, or installed apps stop receiving updates.
         source: "/sw.js",

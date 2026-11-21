@@ -77,6 +77,12 @@ export default function LoginPage() {
             aria-invalid={Boolean(error)}
           />
         </Field>
+        <Link
+          href="/forgot-password"
+          className="-mt-2 self-end text-sm text-brand underline-offset-4 hover:underline"
+        >
+          Forgot password?
+        </Link>
         <Button type="submit" variant="brand" disabled={busy}>
           {busy ? "Signing in…" : "Sign in"}
         </Button>
